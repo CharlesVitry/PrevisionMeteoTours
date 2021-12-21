@@ -130,9 +130,35 @@ data$Temps.passÃ..2 <- NULL
 ```
 
 
-Supprimons les variables dont les observations sont inférieurs à ..
+Observons les valeurs manquantes des variables restantes
+Existe t'il une fonction pour tester toutes les variables ?
 ```{r}
-
+sum(is.na(data$Pression.au.niveau.mer))
+sum(is.na(data$Variation.de.pression.en.3.heures))
+sum(is.na(data$Type.de.tendance.baromÃ.trique))
+sum(is.na(data$Direction.du.vent.moyen.10.mn))
+sum(is.na(data$Vitesse.du.vent.moyen.10.mn))
+sum(is.na(data$TempÃ.rature))
+sum(is.na(data$Point.de.rosÃ.e))
+sum(is.na(data$HumiditÃ.))
+sum(is.na(data$VisibilitÃ..horizontale))
+sum(is.na(data$NebulositÃ..totale))
+sum(is.na(data$NÃ.bulositÃ...des.nuages.de.l..Ã.tage.infÃ.rieur))
+sum(is.na(data$Hauteur.de.la.base.des.nuages.de.l.Ã.tage.infÃ.rieur))
+sum(is.na(data$Type.des.nuages.de.l.Ã.tage.infÃ.rieur))
+sum(is.na(data$Type.des.nuages.de.l.Ã.tage.moyen))
+sum(is.na(data$Type.des.nuages.de.l.Ã.tage.supÃ.rieur))
+sum(is.na(data$Pression.station))
+sum(is.na(data$GÃ.opotentiel))
+sum(is.na(data$Variation.de.pression.en.24.heures))
+sum(is.na(data$TempÃ.rature.minimale.sur.12.heures))
+sum(is.na(data$TempÃ.rature.maximale.sur.12.heures))
+sum(is.na(data$TempÃ.rature.minimale.du.sol.sur.12.heures))
+sum(is.na(data$Rafale.sur.les.10.derniÃ.res.minutes))
+sum(is.na(data$Rafales.sur.une.pÃ.riode))
+sum(is.na(data$Periode.de.mesure.de.la.rafale))
+sum(is.na(data$Etat.du.sol))
+sum(is.na(data$Hauteur.de.la.neige.fraÃ.che))
 
 ```
 
