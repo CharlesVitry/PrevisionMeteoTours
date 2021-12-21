@@ -1,0 +1,167 @@
+---
+title: |
+  ![](Meteo.png){width=1in}  
+  Prévision météorologique sur la Ville de Tours
+author: 
+- Charles Vitry
+- Clovis Deletre
+date: "[Régression Linéaire Multiple](https://fr.wikipedia.org/wiki/R%C3%A9gression_lin%C3%A9aire_multiple)"
+output: pdf_document
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+#install for export in pdf file
+#tinytex::install_tinytex()
+```
+
+## Présentation des données
+
+Nous étions à la recherche d'un **jeu de données** de minimum 300 observations et 15 variables quantitatives dont une à expliquer,
+Nous avions des jeux de données provenant de sondages, mais leurs données étaient qualitative, donc non exploitable dans notre contexte d'étude.
+
+Après recherche, le jeu de données choisis est météorologique, nous allons expliquer la température en fonction des autres variables quantitative. Ce jeu de données a été obtenu dans les open data de la ville de Tours, le fichier est trouvable à l'adresse suivante : <https://data.tours-metropole.fr/explore/dataset/observation-meteorologique-historiques-tours-synop/export/?sort=date>.
+
+# Import de la base de données
+```{r}
+data <- 
+  read.csv("~/PrevisionMeteoTours/observation-meteorologique-historiques-tours-synop.csv", sep=";")
+
+```
+
+D'après l'hébergeur les paramètres atmosphériques sont mesurés (température, humidité, direction et force du vent, pression atmosphérique, hauteur de précipitations) ou observés (temps sensible, description des nuages, visibilité) depuis la surface terrestre.
+
+Après lecture de la colonne Date, les données sont collectés de 2010 jusqu'à maintenant, il en résulte plus de \textcolor{blue}{30k observations}.
+
+
+\newpage
+Nous avpns cependant une limite à notre analyse.
+Puisque l'ensemble de ces observations est tirés d'une seule station d'observation.
+![Data_Location.png](Data_Location.png){width=50%}
+
+Nous supprimons alors les collonnes correspondant à des indications géographiques
+```{r}
+#numero de la station météo
+data$ID.OMM.station <- NULL
+
+#coords géographique
+data$Coordonnees <- NULL
+data$Latitude <- NULL
+data$Longitude <- NULL
+
+#Nom de la ville et département
+data$Nom <- NULL
+data$communes..code. <- NULL
+data$communes..name. <- NULL
+data$EPCI..name. <- NULL
+data$EPCI..code. <- NULL
+data$department..name. <- NULL
+data$department..code. <- NULL
+data$region..name. <- NULL
+data$region..code.<- NULL
+```
+
+Les colonnes vides sont inutilisables
+```{r}
+data$Niveau.baromÃ.trique  <- NULL
+data$TempÃ.rature.minimale.sur.24.heures <- NULL
+data$TempÃ.rature.minimale.sur.24.heures..Â.C. <- NULL
+data$MÃ.thode.de.mesure.TempÃ.rature.du.thermomÃ.tre.mouillÃ. <- NULL
+data$TempÃ.rature.du.thermomÃ.tre.mouillÃ. <- NULL
+data$Hauteur.totale.de.la.couche.de.neige..glace..autre.au.sol <- NULL
+data$NÃ.bulositÃ..couche.nuageuse.4 <- NULL
+data$Hauteur.de.base.4 <- NULL
+data$TempÃ.rature.minimale.sur.24.heures <- NULL
+data$TempÃ.rature.maximale.sur.24.heures <- NULL
+
+```
+
+
+Retirons les variables qualitatives
+
+type de tendance barométrique est mis quali- mi quanti, comment traiter ?
+```{r}
+data$Date <- NULL
+data$Temps.prÃ.sent <- NULL
+data$Temps.passÃ..1 <- NULL
+data$Temps.passÃ..1.1 <- NULL
+data$Temps.passÃ..2 <- NULL
+```
+
+
+Supprimons les variables dont les observations sont inférieurs à ..
+```{r}
+
+```
+
+
+## Statistiques Descriptives
+
+Regardons ce qui caractérise cette base de données,
+tant au niveau des moyennes, de la variance...
+
+```{r donnee}
+dim(data)
+summary(data)
+```
+## Régression multiple avec toutes les variables explicatives
+
+commentaires (r² , variables significatives)
+```{r}
+
+```
+
+tests sur les résidus gaussiens
+```{r}
+
+```
+
+histogramme des résidus
+```{r}
+
+```
+
+## Matrice des corrélations des variables explicative
+
+commentaire
+```{r}
+
+```
+
+visualisation
+```{r}
+
+```
+
+## Régression pas à pas
+
+Ascendant
+```{r}
+
+```
+
+Descendant
+```{r}
+
+```
+
+Comparaison des résultats des régressions
+
+## ACP
+
+```{r}
+
+```
+
+## Régression Ridge
+
+```{r}
+
+```
+
+## Conclusion
+
+
+

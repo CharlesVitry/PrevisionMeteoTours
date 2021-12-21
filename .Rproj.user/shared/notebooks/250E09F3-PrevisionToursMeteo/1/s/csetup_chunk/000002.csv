@@ -1,0 +1,4 @@
+"0","knitr::opts_chunk$set(echo = TRUE)"
+"0",""
+"0","#install for export in pdf file"
+"0","#tinytex::install_tinytex()"
