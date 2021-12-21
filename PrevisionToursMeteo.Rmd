@@ -1,6 +1,6 @@
 ---
 title: |
-  ![](Meteo.png){width=1in}  
+  ![](Meteo.png){width=75%}  
   Prévision météorologique sur la Ville de Tours
 author: 
 - Charles Vitry
