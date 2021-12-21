@@ -1,4 +1,3 @@
 # PrevisionMeteoTours
 
-Rapport
-https://github.com/OkaCola/PrevisionMeteoTours/blob/master/PrevisionToursMeteo.pdf
+[Rapport](https://okacola.github.io/PrevisionMeteoTours/PrevisionToursMeteo.html)
