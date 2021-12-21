@@ -94,6 +94,7 @@ data$Temps.passÃ..2 <- NULL
 Supprimons les variables dont les observations sont inférieurs à ..
 ```{r}
 
+
 ```
 
 
