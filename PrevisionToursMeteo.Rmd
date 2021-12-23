@@ -120,13 +120,15 @@ data$TempÃ.rature.maximale.sur.24.heures <- NULL
 
 Retirons les variables qualitatives
 
-type de tendance barométrique est mis quali- mi quanti, comment traiter ?
+type de tendance barométrique et temps présent est mis quali- mi quanti, nous ne le traitons pas
 ```{r}
 data$Date <- NULL
 data$Temps.prÃ.sent <- NULL
+data$Temps.prÃ.sent.1 <- NULL
 data$Temps.passÃ..1 <- NULL
 data$Temps.passÃ..1.1 <- NULL
 data$Temps.passÃ..2 <- NULL
+data$Type.de.tendance.baromÃ.trique.1 <- NULL
 ```
 
 
@@ -224,22 +226,20 @@ sum(is.na(data$Hauteur.de.base.3))
 #45
 sum(is.na(data$Type.nuage.4))
 #46
-sum(is.na(data$Type.de.tendance.baromÃ.trique.1))
+#sum(is.na(data$Temps.prÃ.sent.1))
 #47
-sum(is.na(data$Temps.prÃ.sent.1))
-#48
 sum(is.na(data$TempÃ.rature..Â.C.))
-#49
+#48
 sum(is.na(data$TempÃ.rature.minimale.sur.12.heures..Â.C.))
-#50
+#49
 sum(is.na(data$TempÃ.rature.maximale.sur.12.heures..Â.C.))
-#51
+#50
 sum(is.na(data$TempÃ.rature.maximale.sur.24.heures..Â.C.))
-#52
+#51
 sum(is.na(data$TempÃ.rature.minimale.du.sol.sur.12.heures..en.Â.C.))
-#53
+#52
 sum(is.na(data$Altitude))
-#54
+#53
 sum(is.na(data$mois_de_l_annee))
 
 ```
@@ -331,7 +331,7 @@ data <- na.omit(data)
 ```{r}
 dim(data)
 ```
-4965 observations de 32 variables, cela est suffisant.
+4965 observations de 30 variables, cela est suffisant.
 ```{r}
 
 ```
