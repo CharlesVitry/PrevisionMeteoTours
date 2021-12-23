@@ -102,7 +102,7 @@ data$region..name. <- NULL
 data$region..code.<- NULL
 ```
 
-Les colonnes vides sont inutilisables
+Les colonnes vides ou constantes sont inutilisables
 ```{r}
 data$Niveau.baromÃ.trique  <- NULL
 data$TempÃ.rature.minimale.sur.24.heures <- NULL
@@ -114,6 +114,11 @@ data$NÃ.bulositÃ..couche.nuageuse.4 <- NULL
 data$Hauteur.de.base.4 <- NULL
 data$TempÃ.rature.minimale.sur.24.heures <- NULL
 data$TempÃ.rature.maximale.sur.24.heures <- NULL
+data$Altitude  <- NULL
+data$NÃ.bulositÃ..couche.nuageuse.1  <- NULL
+data$Etat.du.sol  <- NULL
+data$Periode.de.mesure.de.la.rafale  <- NULL
+data$NÃ.bulositÃ...des.nuages.de.l..Ã.tage.infÃ.rieur  <- NULL
 
 ```
 
@@ -122,15 +127,27 @@ Retirons les variables qualitatives
 
 type de tendance barométrique et temps présent est mis quali- mi quanti, nous ne le traitons pas
 ```{r}
-data$Date <- NULL
+data$Type.de.tendance.baromÃ.trique <- NULL
 data$Temps.prÃ.sent <- NULL
 data$Temps.prÃ.sent.1 <- NULL
 data$Temps.passÃ..1 <- NULL
 data$Temps.passÃ..1.1 <- NULL
 data$Temps.passÃ..2 <- NULL
 data$Type.de.tendance.baromÃ.trique.1 <- NULL
+data$mois_de_l_annee <- NULL
+
+
+
 ```
 
+
+
+Nous n'avons pas supprimé la variable date car elle nous est utile à trier chronologiquement les données.
+```{r,echo=FALSE}
+
+data <- data[order(as.Date(data$Date)),]
+
+```
 
 Observons les valeurs manquantes des variables restantes
 Existe t'il une fonction pour tester toutes les variables ?
@@ -316,6 +333,12 @@ data$TempÃ.rature.maximale.sur.24.heures..Â.C. <- NULL
 
 ```
 
+Il s'agit d'une conversion de Kelvin en celsius, cette ligne n'a pas d'utilité
+```{r}
+data$TempÃ.rature..Â.C. <- NULL
+```
+
+
 Nous sommes alors à 32 variables
 Mais combien si l'on retire les lignes avec des manquants ?
 
@@ -327,18 +350,68 @@ data <- na.omit(data)
 ```
 
 
+On créé une colonne DateEnJour afin que chaque jour est son numéro
+```{r}
+#library(dplyr)
+#df %>% 
+#  slice(which.max(as.Date(data$Date)))
+
+data$jour = format(as.Date(data$Date,format="%Y-%m-%d"), format = "%d")
+data$mois = ( format(as.Date(data$Date,format="%Y-%m-%d"), format = "%m"))
+data$annee = format(as.Date(data$Date,format="%Y-%m-%d"), format = "%Y")
+
+#multiplieur 
+#c'était un problème de classe de donnée
+#data$trente <- replicate(4965, 30)
+#data$troisCent <- replicate(4965, 365)
+
+data$jour <- as.numeric(data$jour)
+data$mois <- as.numeric(data$mois)
+data$annee <- as.numeric(data$annee)
+
+
+
+data$DateEnJour <- data$jour + (30 *data$mois) + ( 365*data$annee)
+
+```
+
+
+
+On ne garde que une observation par jour, 
+en effet le nbre d'observation par jour est irrégulier.
+```{r}
+
+data <- do.call(rbind, by(data, list(data$DateEnJour), 
+                  FUN=function(x) head(x, 1)))
+
+```
+
+On supprimme les variables créé et la date
+```{r}
+data$Date <- NULL
+data$DateEnJour <- NULL
+data$annee <- NULL
+data$mois <- NULL
+data$jour <- NULL
+```
+
+
+
+Cependant nous voulons prédire la température,
+nous creons une colonne température mais décaler de 2 jours
+
+```{r}
+
+data$TemperatureDecaler <- lag(data$TempÃ.rature)
+#on supprimme la première observation
+data = data[-1,]
+
+```
 
 ```{r}
 dim(data)
 ```
-4965 observations de 30 variables, cela est suffisant.
-```{r}
-
-```
-
-```{r}
-
-```
+1655 observations de 23 variables, cela est suffisant pour la régression multiple
 
 
 ## Statistiques Descriptives
@@ -350,7 +423,17 @@ tant au niveau des moyennes, de la variance...
 dim(data)
 summary(data)
 ```
+Nos observations sont complètes, et les variables toutes quantitatives, nous pouvons commencer la régression multiple.
+
+
+
 ## Régression multiple avec toutes les variables explicatives
+
+```{r}
+reg.mul <- lm()
+
+
+```
 
 commentaires (r² , variables significatives)
 ```{r}
