@@ -133,32 +133,210 @@ data$Temps.passÃ..2 <- NULL
 Observons les valeurs manquantes des variables restantes
 Existe t'il une fonction pour tester toutes les variables ?
 ```{r}
+#1
 sum(is.na(data$Pression.au.niveau.mer))
+#2
 sum(is.na(data$Variation.de.pression.en.3.heures))
+#3
 sum(is.na(data$Type.de.tendance.baromÃ.trique))
+#4
 sum(is.na(data$Direction.du.vent.moyen.10.mn))
+#5
 sum(is.na(data$Vitesse.du.vent.moyen.10.mn))
+#6
 sum(is.na(data$TempÃ.rature))
+#7
 sum(is.na(data$Point.de.rosÃ.e))
+#8
 sum(is.na(data$HumiditÃ.))
+#9
 sum(is.na(data$VisibilitÃ..horizontale))
+#10
 sum(is.na(data$NebulositÃ..totale))
+#11
 sum(is.na(data$NÃ.bulositÃ...des.nuages.de.l..Ã.tage.infÃ.rieur))
+#12
 sum(is.na(data$Hauteur.de.la.base.des.nuages.de.l.Ã.tage.infÃ.rieur))
+#13
 sum(is.na(data$Type.des.nuages.de.l.Ã.tage.infÃ.rieur))
+#14
 sum(is.na(data$Type.des.nuages.de.l.Ã.tage.moyen))
+#15
 sum(is.na(data$Type.des.nuages.de.l.Ã.tage.supÃ.rieur))
+#16
 sum(is.na(data$Pression.station))
+#17
 sum(is.na(data$GÃ.opotentiel))
+#18
 sum(is.na(data$Variation.de.pression.en.24.heures))
+#19
 sum(is.na(data$TempÃ.rature.minimale.sur.12.heures))
+#20
 sum(is.na(data$TempÃ.rature.maximale.sur.12.heures))
+#21
 sum(is.na(data$TempÃ.rature.minimale.du.sol.sur.12.heures))
+#22
 sum(is.na(data$Rafale.sur.les.10.derniÃ.res.minutes))
+#23
 sum(is.na(data$Rafales.sur.une.pÃ.riode))
+#24
 sum(is.na(data$Periode.de.mesure.de.la.rafale))
+#25
 sum(is.na(data$Etat.du.sol))
+#26
 sum(is.na(data$Hauteur.de.la.neige.fraÃ.che))
+#27
+sum(is.na(data$Periode.de.mesure.de.la.neige.fraiche))
+#28
+sum(is.na(data$PrÃ.cipitations.dans.la.derniÃ.re.heure))
+#29
+sum(is.na(data$PrÃ.cipitations.dans.les.3.derniÃ.res.heures))
+#30
+sum(is.na(data$PrÃ.cipitations.dans.les.6.derniÃ.res.heures))
+#31
+sum(is.na(data$PrÃ.cipitations.dans.les.12.derniÃ.res.heures))
+#32
+sum(is.na(data$PrÃ.cipitations.dans.les.24.derniÃ.res.heures))
+#33
+sum(is.na(data$PhÃ.nomÃ.ne.spÃ.cial.1))
+#34
+sum(is.na(data$PhÃ.nomÃ.ne.spÃ.cial.2))
+#35
+sum(is.na(data$PhÃ.nomÃ.ne.spÃ.cial.3))
+#36
+sum(is.na(data$PhÃ.nomÃ.ne.spÃ.cial.4))
+#37
+sum(is.na(data$NÃ.bulositÃ..couche.nuageuse.1))
+#38
+sum(is.na(data$Type.nuage.1))
+#39
+sum(is.na(data$Hauteur.de.base.1))
+#40
+sum(is.na(data$NÃ.bulositÃ..couche.nuageuse.2))
+#41
+sum(is.na(data$Type.nuage.2))
+#42
+sum(is.na(data$NÃ.bulositÃ..couche.nuageuse.3))
+#43
+sum(is.na(data$Type.nuage.3))
+#44
+sum(is.na(data$Hauteur.de.base.3))
+#45
+sum(is.na(data$Type.nuage.4))
+#46
+sum(is.na(data$Type.de.tendance.baromÃ.trique.1))
+#47
+sum(is.na(data$Temps.prÃ.sent.1))
+#48
+sum(is.na(data$TempÃ.rature..Â.C.))
+#49
+sum(is.na(data$TempÃ.rature.minimale.sur.12.heures..Â.C.))
+#50
+sum(is.na(data$TempÃ.rature.maximale.sur.12.heures..Â.C.))
+#51
+sum(is.na(data$TempÃ.rature.maximale.sur.24.heures..Â.C.))
+#52
+sum(is.na(data$TempÃ.rature.minimale.du.sol.sur.12.heures..en.Â.C.))
+#53
+sum(is.na(data$Altitude))
+#54
+sum(is.na(data$mois_de_l_annee))
+
+```
+On en déduit cela
+plus 20 000 manquants: 
+$Type.des.nuages.de.l.Ã.tage.infÃ.rieur
+$Type.des.nuages.de.l.Ã.tage.moyen
+$Type.des.nuages.de.l.Ã.tage.supÃ.rieur
+$GÃ.opotentiel
+$TempÃ.rature.minimale.sur.12.heures
+$TempÃ.rature.maximale.sur.12.heures
+$Hauteur.de.la.neige.fraÃ.che
+$Periode.de.mesure.de.la.neige.fraiche
+$PhÃ.nomÃ.ne.spÃ.cial.1
+$PhÃ.nomÃ.ne.spÃ.cial.2
+$PhÃ.nomÃ.ne.spÃ.cial.3
+$PhÃ.nomÃ.ne.spÃ.cial.4
+$Type.nuage.1
+$Hauteur.de.base.1
+$NÃ.bulositÃ..couche.nuageuse.2
+$Type.nuage.2
+$NÃ.bulositÃ..couche.nuageuse.3
+$Type.nuage.3
+$Hauteur.de.base.3
+$Type.nuage.4
+$TempÃ.rature.minimale.sur.12.heures..Â.C.
+$TempÃ.rature.maximale.sur.12.heures..Â.C.
+$TempÃ.rature.maximale.sur.24.heures..Â.C.
+
+ plus de 10 000:
+$NebulositÃ..totale
+$Hauteur.de.la.base.des.nuages.de.l.Ã.tage.infÃ.rieur
+$Variation.de.pression.en.24.heures
+$TempÃ.rature.minimale.du.sol.sur.12.heures
+$Rafale.sur.les.10.derniÃ.res.minutes
+$Etat.du.sol
+$PrÃ.cipitations.dans.les.6.derniÃ.res.heures
+$PrÃ.cipitations.dans.les.12.derniÃ.res.heures
+$PrÃ.cipitations.dans.les.24.derniÃ.res.heures
+$NÃ.bulositÃ..couche.nuageuse.1
+$TempÃ.rature.minimale.du.sol.sur.12.heures..en.Â.C.
+
+plus de 5000:
+$NÃ.bulositÃ...des.nuages.de.l..Ã.tage.infÃ.rieur
+
+Suppression des plus de 20 000
+```{r}
+data$Type.des.nuages.de.l.Ã.tage.infÃ.rieur <- NULL
+data$Type.des.nuages.de.l.Ã.tage.moyen <- NULL
+data$Type.des.nuages.de.l.Ã.tage.supÃ.rieur <- NULL
+data$GÃ.opotentiel <- NULL
+data$TempÃ.rature.minimale.sur.12.heures <- NULL
+data$TempÃ.rature.maximale.sur.12.heures <- NULL
+data$Hauteur.de.la.neige.fraÃ.che <- NULL
+data$Periode.de.mesure.de.la.neige.fraiche <- NULL
+data$PhÃ.nomÃ.ne.spÃ.cial.1 <- NULL
+data$PhÃ.nomÃ.ne.spÃ.cial.2 <- NULL
+data$PhÃ.nomÃ.ne.spÃ.cial.3 <- NULL
+data$PhÃ.nomÃ.ne.spÃ.cial.4 <- NULL
+data$Type.nuage.1 <- NULL
+data$Hauteur.de.base.1 <- NULL
+data$NÃ.bulositÃ..couche.nuageuse.2 <- NULL
+data$Type.nuage.2 <- NULL
+data$NÃ.bulositÃ..couche.nuageuse.3 <- NULL
+data$Type.nuage.3 <- NULL
+data$Hauteur.de.base.3 <- NULL
+data$Type.nuage.4 <- NULL
+data$TempÃ.rature.minimale.sur.12.heures..Â.C. <- NULL
+data$TempÃ.rature.maximale.sur.12.heures..Â.C. <- NULL
+data$TempÃ.rature.maximale.sur.24.heures..Â.C. <- NULL
+
+
+
+
+```
+
+Nous sommes alors à 32 variables
+Mais combien si l'on retire les lignes avec des manquants ?
+
+
+
+```{r, echo=FALSE}
+which(is.na(data))
+data <- na.omit(data)
+```
+
+
+
+```{r}
+dim(data)
+```
+4965 observations de 32 variables, cela est suffisant.
+```{r}
+
+```
+
+```{r}
 
 ```
 
