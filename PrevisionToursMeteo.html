@@ -1579,7 +1579,7 @@ data$department..name. &lt;- NULL
 data$department..code. &lt;- NULL
 data$region..name. &lt;- NULL
 data$region..code.&lt;- NULL</code></pre>
-<p>Les colonnes vides sont inutilisables</p>
+<p>Les colonnes vides ou constantes sont inutilisables</p>
 <pre class="r"><code>data$Niveau.baromÃ.trique  &lt;- NULL
 data$TempÃ.rature.minimale.sur.24.heures &lt;- NULL
 data$TempÃ.rature.minimale.sur.24.heures..Â.C. &lt;- NULL
@@ -1589,243 +1589,557 @@ data$Hauteur.totale.de.la.couche.de.neige..glace..autre.au.sol &lt;- NULL
 data$NÃ.bulositÃ..couche.nuageuse.4 &lt;- NULL
 data$Hauteur.de.base.4 &lt;- NULL
 data$TempÃ.rature.minimale.sur.24.heures &lt;- NULL
-data$TempÃ.rature.maximale.sur.24.heures &lt;- NULL</code></pre>
+data$TempÃ.rature.maximale.sur.24.heures &lt;- NULL
+data$Altitude  &lt;- NULL
+data$NÃ.bulositÃ..couche.nuageuse.1  &lt;- NULL
+data$Etat.du.sol  &lt;- NULL
+data$Periode.de.mesure.de.la.rafale  &lt;- NULL
+data$NÃ.bulositÃ...des.nuages.de.l..Ã.tage.infÃ.rieur  &lt;- NULL
+data$TempÃ.rature.minimale.du.sol.sur.12.heures..en.Â.C. &lt;- NULL</code></pre>
 <p>Retirons les variables qualitatives</p>
-<p>type de tendance barométrique est mis quali- mi quanti, comment traiter ?</p>
-<pre class="r"><code>data$Date &lt;- NULL
+<p>type de tendance barométrique et temps présent est mis quali- mi quanti, nous ne le traitons pas</p>
+<pre class="r"><code>data$Type.de.tendance.baromÃ.trique &lt;- NULL
 data$Temps.prÃ.sent &lt;- NULL
+data$Temps.prÃ.sent.1 &lt;- NULL
 data$Temps.passÃ..1 &lt;- NULL
 data$Temps.passÃ..1.1 &lt;- NULL
-data$Temps.passÃ..2 &lt;- NULL</code></pre>
-<p>Supprimons les variables dont les observations sont inférieurs à ..</p>
+data$Temps.passÃ..2 &lt;- NULL
+data$Type.de.tendance.baromÃ.trique.1 &lt;- NULL
+data$mois_de_l_annee &lt;- NULL</code></pre>
+<p>Nous n’avons pas supprimé la variable date car elle nous est utile à trier chronologiquement les données.</p>
+<pre class="r"><code>data &lt;- data[order(as.Date(data$Date)),]</code></pre>
+<p>Observons les valeurs manquantes des variables restantes Existe t’il une fonction pour tester toutes les variables ?</p>
+<pre class="r"><code>#1
+sum(is.na(data$Pression.au.niveau.mer))</code></pre>
+<pre><code>## [1] 1</code></pre>
+<pre class="r"><code>#2
+sum(is.na(data$Variation.de.pression.en.3.heures))</code></pre>
+<pre><code>## [1] 12</code></pre>
+<pre class="r"><code>#3
+sum(is.na(data$Type.de.tendance.baromÃ.trique))</code></pre>
+<pre><code>## [1] 0</code></pre>
+<pre class="r"><code>#4
+sum(is.na(data$Direction.du.vent.moyen.10.mn))</code></pre>
+<pre><code>## [1] 36</code></pre>
+<pre class="r"><code>#5
+sum(is.na(data$Vitesse.du.vent.moyen.10.mn))</code></pre>
+<pre><code>## [1] 35</code></pre>
+<pre class="r"><code>#6
+sum(is.na(data$TempÃ.rature))</code></pre>
+<pre><code>## [1] 1</code></pre>
+<pre class="r"><code>#7
+sum(is.na(data$Point.de.rosÃ.e))</code></pre>
+<pre><code>## [1] 1</code></pre>
+<pre class="r"><code>#8
+sum(is.na(data$HumiditÃ.))</code></pre>
+<pre><code>## [1] 1</code></pre>
+<pre class="r"><code>#9
+sum(is.na(data$VisibilitÃ..horizontale))</code></pre>
+<pre><code>## [1] 3</code></pre>
+<pre class="r"><code>#10
+sum(is.na(data$NebulositÃ..totale))</code></pre>
+<pre><code>## [1] 10629</code></pre>
+<pre class="r"><code>#11
+sum(is.na(data$NÃ.bulositÃ...des.nuages.de.l..Ã.tage.infÃ.rieur))</code></pre>
+<pre><code>## [1] 0</code></pre>
+<pre class="r"><code>#12
+sum(is.na(data$Hauteur.de.la.base.des.nuages.de.l.Ã.tage.infÃ.rieur))</code></pre>
+<pre><code>## [1] 10595</code></pre>
+<pre class="r"><code>#13
+sum(is.na(data$Type.des.nuages.de.l.Ã.tage.infÃ.rieur))</code></pre>
+<pre><code>## [1] 24880</code></pre>
+<pre class="r"><code>#14
+sum(is.na(data$Type.des.nuages.de.l.Ã.tage.moyen))</code></pre>
+<pre><code>## [1] 25867</code></pre>
+<pre class="r"><code>#15
+sum(is.na(data$Type.des.nuages.de.l.Ã.tage.supÃ.rieur))</code></pre>
+<pre><code>## [1] 26137</code></pre>
+<pre class="r"><code>#16
+sum(is.na(data$Pression.station))</code></pre>
+<pre><code>## [1] 1</code></pre>
+<pre class="r"><code>#17
+sum(is.na(data$GÃ.opotentiel))</code></pre>
+<pre><code>## [1] 34854</code></pre>
+<pre class="r"><code>#18
+sum(is.na(data$Variation.de.pression.en.24.heures))</code></pre>
+<pre><code>## [1] 14400</code></pre>
+<pre class="r"><code>#19
+sum(is.na(data$TempÃ.rature.minimale.sur.12.heures))</code></pre>
+<pre><code>## [1] 26144</code></pre>
+<pre class="r"><code>#20
+sum(is.na(data$TempÃ.rature.maximale.sur.12.heures))</code></pre>
+<pre><code>## [1] 26144</code></pre>
+<pre class="r"><code>#21
+sum(is.na(data$TempÃ.rature.minimale.du.sol.sur.12.heures))</code></pre>
+<pre><code>## [1] 12608</code></pre>
+<pre class="r"><code>#22
+sum(is.na(data$Rafale.sur.les.10.derniÃ.res.minutes))</code></pre>
+<pre><code>## [1] 14252</code></pre>
+<pre class="r"><code>#23
+sum(is.na(data$Rafales.sur.une.pÃ.riode))</code></pre>
+<pre><code>## [1] 67</code></pre>
+<pre class="r"><code>#24
+sum(is.na(data$Periode.de.mesure.de.la.rafale))</code></pre>
+<pre><code>## [1] 0</code></pre>
+<pre class="r"><code>#25
+sum(is.na(data$Etat.du.sol))</code></pre>
+<pre><code>## [1] 0</code></pre>
+<pre class="r"><code>#26
+sum(is.na(data$Hauteur.de.la.neige.fraÃ.che))</code></pre>
+<pre><code>## [1] 24245</code></pre>
+<pre class="r"><code>#27
+sum(is.na(data$Periode.de.mesure.de.la.neige.fraiche))</code></pre>
+<pre><code>## [1] 25311</code></pre>
+<pre class="r"><code>#28
+sum(is.na(data$PrÃ.cipitations.dans.la.derniÃ.re.heure))</code></pre>
+<pre><code>## [1] 76</code></pre>
+<pre class="r"><code>#29
+sum(is.na(data$PrÃ.cipitations.dans.les.3.derniÃ.res.heures))</code></pre>
+<pre><code>## [1] 64</code></pre>
+<pre class="r"><code>#30
+sum(is.na(data$PrÃ.cipitations.dans.les.6.derniÃ.res.heures))</code></pre>
+<pre><code>## [1] 10854</code></pre>
+<pre class="r"><code>#31
+sum(is.na(data$PrÃ.cipitations.dans.les.12.derniÃ.res.heures))</code></pre>
+<pre><code>## [1] 10962</code></pre>
+<pre class="r"><code>#32
+sum(is.na(data$PrÃ.cipitations.dans.les.24.derniÃ.res.heures))</code></pre>
+<pre><code>## [1] 12892</code></pre>
+<pre class="r"><code>#33
+sum(is.na(data$PhÃ.nomÃ.ne.spÃ.cial.1))</code></pre>
+<pre><code>## [1] 20571</code></pre>
+<pre class="r"><code>#34
+sum(is.na(data$PhÃ.nomÃ.ne.spÃ.cial.2))</code></pre>
+<pre><code>## [1] 20581</code></pre>
+<pre class="r"><code>#35
+sum(is.na(data$PhÃ.nomÃ.ne.spÃ.cial.3))</code></pre>
+<pre><code>## [1] 26536</code></pre>
+<pre class="r"><code>#36
+sum(is.na(data$PhÃ.nomÃ.ne.spÃ.cial.4))</code></pre>
+<pre><code>## [1] 34793</code></pre>
+<pre class="r"><code>#37
+sum(is.na(data$NÃ.bulositÃ..couche.nuageuse.1))</code></pre>
+<pre><code>## [1] 0</code></pre>
+<pre class="r"><code>#38
+sum(is.na(data$Type.nuage.1))</code></pre>
+<pre><code>## [1] 25287</code></pre>
+<pre class="r"><code>#39
+sum(is.na(data$Hauteur.de.base.1))</code></pre>
+<pre><code>## [1] 14595</code></pre>
+<pre class="r"><code>#40
+sum(is.na(data$NÃ.bulositÃ..couche.nuageuse.2))</code></pre>
+<pre><code>## [1] 25568</code></pre>
+<pre class="r"><code>#41
+sum(is.na(data$Type.nuage.2))</code></pre>
+<pre><code>## [1] 31175</code></pre>
+<pre class="r"><code>#42
+sum(is.na(data$NÃ.bulositÃ..couche.nuageuse.3))</code></pre>
+<pre><code>## [1] 31847</code></pre>
+<pre class="r"><code>#43
+sum(is.na(data$Type.nuage.3))</code></pre>
+<pre><code>## [1] 34155</code></pre>
+<pre class="r"><code>#44
+sum(is.na(data$Hauteur.de.base.3))</code></pre>
+<pre><code>## [1] 31847</code></pre>
+<pre class="r"><code>#45
+sum(is.na(data$Type.nuage.4))</code></pre>
+<pre><code>## [1] 34267</code></pre>
+<pre class="r"><code>#46
+#sum(is.na(data$Temps.prÃ.sent.1))
+#47
+sum(is.na(data$TempÃ.rature..Â.C.))</code></pre>
+<pre><code>## [1] 1</code></pre>
+<pre class="r"><code>#48
+sum(is.na(data$TempÃ.rature.minimale.sur.12.heures..Â.C.))</code></pre>
+<pre><code>## [1] 26144</code></pre>
+<pre class="r"><code>#49
+sum(is.na(data$TempÃ.rature.maximale.sur.12.heures..Â.C.))</code></pre>
+<pre><code>## [1] 26144</code></pre>
+<pre class="r"><code>#50
+sum(is.na(data$TempÃ.rature.maximale.sur.24.heures..Â.C.))</code></pre>
+<pre><code>## [1] 34854</code></pre>
+<pre class="r"><code>#51
+sum(is.na(data$TempÃ.rature.minimale.du.sol.sur.12.heures..en.Â.C.))</code></pre>
+<pre><code>## [1] 0</code></pre>
+<pre class="r"><code>#52
+sum(is.na(data$Altitude))</code></pre>
+<pre><code>## [1] 0</code></pre>
+<pre class="r"><code>#53
+sum(is.na(data$mois_de_l_annee))</code></pre>
+<pre><code>## [1] 0</code></pre>
+<p>On en déduit cela plus 20 000 manquants: $Type.des.nuages.de.l.Ã.tage.infÃ.rieur $Type.des.nuages.de.l.Ã.tage.moyen $Type.des.nuages.de.l.Ã.tage.supÃ.rieur $GÃ.opotentiel $TempÃ.rature.minimale.sur.12.heures $TempÃ.rature.maximale.sur.12.heures $Hauteur.de.la.neige.fraÃ.che $Periode.de.mesure.de.la.neige.fraiche $PhÃ.nomÃ.ne.spÃ.cial.1 $PhÃ.nomÃ.ne.spÃ.cial.2 $PhÃ.nomÃ.ne.spÃ.cial.3 $PhÃ.nomÃ.ne.spÃ.cial.4 $Type.nuage.1 $Hauteur.de.base.1 $NÃ.bulositÃ..couche.nuageuse.2 $Type.nuage.2 $NÃ.bulositÃ..couche.nuageuse.3 $Type.nuage.3 $Hauteur.de.base.3 $Type.nuage.4 $TempÃ.rature.minimale.sur.12.heures..Â.C. $TempÃ.rature.maximale.sur.12.heures..Â.C. $TempÃ.rature.maximale.sur.24.heures..Â.C.</p>
+<p>plus de 10 000: $NebulositÃ..totale $Hauteur.de.la.base.des.nuages.de.l.Ã.tage.infÃ.rieur $Variation.de.pression.en.24.heures $TempÃ.rature.minimale.du.sol.sur.12.heures $Rafale.sur.les.10.derniÃ.res.minutes $Etat.du.sol $PrÃ.cipitations.dans.les.6.derniÃ.res.heures $PrÃ.cipitations.dans.les.12.derniÃ.res.heures $PrÃ.cipitations.dans.les.24.derniÃ.res.heures $NÃ.bulositÃ..couche.nuageuse.1 $TempÃ.rature.minimale.du.sol.sur.12.heures..en.Â.C.</p>
+<p>plus de 5000: $NÃ.bulositÃ…des.nuages.de.l..Ã.tage.infÃ.rieur</p>
+<p>Suppression des plus de 20 000</p>
+<pre class="r"><code>data$Type.des.nuages.de.l.Ã.tage.infÃ.rieur &lt;- NULL
+data$Type.des.nuages.de.l.Ã.tage.moyen &lt;- NULL
+data$Type.des.nuages.de.l.Ã.tage.supÃ.rieur &lt;- NULL
+data$GÃ.opotentiel &lt;- NULL
+data$TempÃ.rature.minimale.sur.12.heures &lt;- NULL
+data$TempÃ.rature.maximale.sur.12.heures &lt;- NULL
+data$Hauteur.de.la.neige.fraÃ.che &lt;- NULL
+data$Periode.de.mesure.de.la.neige.fraiche &lt;- NULL
+data$PhÃ.nomÃ.ne.spÃ.cial.1 &lt;- NULL
+data$PhÃ.nomÃ.ne.spÃ.cial.2 &lt;- NULL
+data$PhÃ.nomÃ.ne.spÃ.cial.3 &lt;- NULL
+data$PhÃ.nomÃ.ne.spÃ.cial.4 &lt;- NULL
+data$Type.nuage.1 &lt;- NULL
+data$Hauteur.de.base.1 &lt;- NULL
+data$NÃ.bulositÃ..couche.nuageuse.2 &lt;- NULL
+data$Type.nuage.2 &lt;- NULL
+data$NÃ.bulositÃ..couche.nuageuse.3 &lt;- NULL
+data$Type.nuage.3 &lt;- NULL
+data$Hauteur.de.base.3 &lt;- NULL
+data$Type.nuage.4 &lt;- NULL
+data$TempÃ.rature.minimale.sur.12.heures..Â.C. &lt;- NULL
+data$TempÃ.rature.maximale.sur.12.heures..Â.C. &lt;- NULL
+data$TempÃ.rature.maximale.sur.24.heures..Â.C. &lt;- NULL</code></pre>
+<p>Il s’agit d’une conversion de Kelvin en celsius, cette ligne n’a pas d’utilité</p>
+<pre class="r"><code>data$TempÃ.rature..Â.C. &lt;- NULL</code></pre>
+<p>Nous sommes alors à 32 variables Mais combien si l’on retire les lignes avec des manquants ?</p>
+<pre class="r"><code>which(is.na(data))
+data &lt;- na.omit(data)</code></pre>
+<p>On créé une colonne DateEnJour afin que chaque jour est son numéro</p>
+<pre class="r"><code>#library(dplyr)
+#df %&gt;% 
+#  slice(which.max(as.Date(data$Date)))
+
+data$jour = format(as.Date(data$Date,format=&quot;%Y-%m-%d&quot;), format = &quot;%d&quot;)
+data$mois = ( format(as.Date(data$Date,format=&quot;%Y-%m-%d&quot;), format = &quot;%m&quot;))
+data$annee = format(as.Date(data$Date,format=&quot;%Y-%m-%d&quot;), format = &quot;%Y&quot;)
+
+#multiplieur 
+#c&#39;était un problème de classe de donnée
+#data$trente &lt;- replicate(4965, 30)
+#data$troisCent &lt;- replicate(4965, 365)
+
+data$jour &lt;- as.numeric(data$jour)
+data$mois &lt;- as.numeric(data$mois)
+data$annee &lt;- as.numeric(data$annee)
+
+
+
+data$DateEnJour &lt;- data$jour + (30 *data$mois) + ( 365*data$annee)</code></pre>
+<p>On ne garde que une observation par jour pour un jeu de prévision en effet le nbre d’observation par jour est irrégulier.</p>
+<pre class="r"><code>prevision &lt;- do.call(rbind, by(data, list(data$DateEnJour), 
+                  FUN=function(x) head(x, 1)))</code></pre>
+<p>On supprimme les variables créé et la date</p>
+<pre class="r"><code>data$Date &lt;- NULL
+data$DateEnJour &lt;- NULL
+data$annee &lt;- NULL
+data$mois &lt;- NULL
+data$jour &lt;- NULL
+
+prevision$Date &lt;- NULL
+prevision$DateEnJour &lt;- NULL
+prevision$annee &lt;- NULL
+prevision$mois &lt;- NULL
+prevision$jour &lt;- NULL</code></pre>
+<p>Nous avons désormais deux jeux pour réaliser une régression linéaire, le premier avec 5661 observations , le second avec une observation par jour dans le but de déterminer la Température du jour à venir.</p>
+<p>Pour le jeu de prévision, nous creons une colonne température mais décaler de 1 jour.</p>
+<p>La première méthode utilisé n’était pas correct puisque l’on décalait dans le mauvais sens la colonne avec la méthode lag, puis on supprimait la première observation.</p>
+<pre class="r"><code>#Mauvaise méthode
+#data$TemperatureDecaler &lt;- lag(data$TempÃ.rature)
+#on supprimme la première observation
+#data = data[-1,]
+
+
+library(Hmisc)</code></pre>
+<pre><code>## Warning: le package &#39;Hmisc&#39; a été compilé avec la version R 4.1.2</code></pre>
+<pre><code>## Le chargement a nécessité le package : lattice</code></pre>
+<pre><code>## Le chargement a nécessité le package : survival</code></pre>
+<pre><code>## Le chargement a nécessité le package : Formula</code></pre>
+<pre><code>## Le chargement a nécessité le package : ggplot2</code></pre>
+<pre><code>## 
+## Attachement du package : &#39;Hmisc&#39;</code></pre>
+<pre><code>## Les objets suivants sont masqués depuis &#39;package:base&#39;:
+## 
+##     format.pval, units</code></pre>
+<pre class="r"><code>#prevision$Precipitation_Jour_Suivant &lt;- Lag(prevision$PrÃ.cipitations.dans.les.24.derniÃ.res.heures, shift = -1)
+prevision$Precipitation_Jour_Suivant &lt;- Lag(prevision$TempÃ.rature, shift = -1)
+#on supprimme la derniere observation
+library(dplyr)</code></pre>
+<pre><code>## Warning: le package &#39;dplyr&#39; a été compilé avec la version R 4.1.2</code></pre>
+<pre><code>## 
+## Attachement du package : &#39;dplyr&#39;</code></pre>
+<pre><code>## Les objets suivants sont masqués depuis &#39;package:Hmisc&#39;:
+## 
+##     src, summarize</code></pre>
+<pre><code>## Les objets suivants sont masqués depuis &#39;package:stats&#39;:
+## 
+##     filter, lag</code></pre>
+<pre><code>## Les objets suivants sont masqués depuis &#39;package:base&#39;:
+## 
+##     intersect, setdiff, setequal, union</code></pre>
+<pre class="r"><code>prevision = slice(prevision, 1:(n() -1))
+
+
+#De même on réduit la taille du nbre d&#39;observation de data
+data = slice(data, 1:(n() -662))</code></pre>
+<pre class="r"><code>dim(data)</code></pre>
+<pre><code>## [1] 4999   21</code></pre>
+<pre class="r"><code>dim(prevision)</code></pre>
+<pre><code>## [1] 1655   22</code></pre>
+<p>4999 observations de 21 variables, cela est suffisant pour la régression multiple</p>
 <div id="statistiques-descriptives" class="section level2">
 <h2>Statistiques Descriptives</h2>
 <p>Regardons ce qui caractérise cette base de données, tant au niveau des moyennes, de la variance…</p>
-<pre class="r"><code>dim(data)</code></pre>
-<pre><code>## [1] 34854    55</code></pre>
 <pre class="r"><code>summary(data)</code></pre>
 <pre><code>##  Pression.au.niveau.mer Variation.de.pression.en.3.heures
-##  Min.   : 97010         Min.   :-940.0000                
-##  1st Qu.:101230         1st Qu.: -70.0000                
-##  Median :101770         Median :   0.0000                
-##  Mean   :101722         Mean   :   0.1027                
-##  3rd Qu.:102290         3rd Qu.:  70.0000                
-##  Max.   :104480         Max.   :1200.0000                
-##  NA&#39;s   :1              NA&#39;s   :12                       
-##  Type.de.tendance.baromÃ.trique Direction.du.vent.moyen.10.mn
-##  Length:34854                   Min.   :  0.0                
-##  Class :character               1st Qu.: 80.0                
-##  Mode  :character               Median :200.0                
-##                                 Mean   :183.2                
-##                                 3rd Qu.:260.0                
-##                                 Max.   :360.0                
-##                                 NA&#39;s   :36                   
-##  Vitesse.du.vent.moyen.10.mn  TempÃ.rature   Point.de.rosÃ.e   HumiditÃ.     
-##  Min.   : 0.000              Min.   :261.9   Min.   :258.1   Min.   : 16.00  
-##  1st Qu.: 2.100              1st Qu.:280.6   1st Qu.:277.4   1st Qu.: 65.00  
-##  Median : 3.100              Median :285.2   Median :281.4   Median : 81.00  
-##  Mean   : 3.413              Mean   :285.6   Mean   :281.0   Mean   : 76.38  
-##  3rd Qu.: 4.600              3rd Qu.:290.4   3rd Qu.:284.9   3rd Qu.: 91.00  
-##  Max.   :17.500              Max.   :313.6   Max.   :296.4   Max.   :100.00  
-##  NA&#39;s   :35                  NA&#39;s   :1       NA&#39;s   :1       NA&#39;s   :1       
-##  VisibilitÃ..horizontale NebulositÃ..totale
-##  Min.   :   30           Min.   :  0.0     
-##  1st Qu.:12920           1st Qu.: 75.0     
-##  Median :25000           Median :100.0     
-##  Mean   :27405           Mean   : 80.1     
-##  3rd Qu.:40000           3rd Qu.:100.0     
-##  Max.   :75000           Max.   :101.0     
-##  NA&#39;s   :3               NA&#39;s   :10629     
-##  NÃ.bulositÃ...des.nuages.de.l..Ã.tage.infÃ.rieur
-##  Min.   :0.000                                   
-##  1st Qu.:0.000                                   
-##  Median :5.000                                   
-##  Mean   :4.268                                   
-##  3rd Qu.:8.000                                   
-##  Max.   :9.000                                   
-##  NA&#39;s   :7780                                    
-##  Hauteur.de.la.base.des.nuages.de.l.Ã.tage.infÃ.rieur
-##  Min.   :  30                                        
-##  1st Qu.: 450                                        
-##  Median :1250                                        
-##  Mean   :1722                                        
-##  3rd Qu.:1750                                        
-##  Max.   :8500                                        
-##  NA&#39;s   :10595                                       
-##  Type.des.nuages.de.l.Ã.tage.infÃ.rieur Type.des.nuages.de.l.Ã.tage.moyen
-##  Min.   :30.00                          Min.   :20.0                     
-##  1st Qu.:30.00                          1st Qu.:20.0                     
-##  Median :35.00                          Median :23.0                     
-##  Mean   :34.54                          Mean   :35.6                     
-##  3rd Qu.:35.00                          3rd Qu.:61.0                     
-##  Max.   :62.00                          Max.   :61.0                     
-##  NA&#39;s   :24880                          NA&#39;s   :25867                    
-##  Type.des.nuages.de.l.Ã.tage.supÃ.rieur Pression.station GÃ.opotentiel 
-##  Min.   :10.00                          Min.   : 95710   Mode:logical  
-##  1st Qu.:10.00                          1st Qu.: 99900   NA&#39;s:34854    
-##  Median :12.00                          Median :100440                 
-##  Mean   :32.99                          Mean   :100377                 
-##  3rd Qu.:60.00                          3rd Qu.:100940                 
-##  Max.   :60.00                          Max.   :103050                 
-##  NA&#39;s   :26137                          NA&#39;s   :1                      
-##  Variation.de.pression.en.24.heures TempÃ.rature.minimale.sur.12.heures
-##  Min.   :-4410.000                  Min.   :261.2                      
-##  1st Qu.: -350.000                  1st Qu.:277.6                      
-##  Median :  -20.000                  Median :282.1                      
-##  Mean   :    0.214                  Mean   :281.9                      
-##  3rd Qu.:  350.000                  3rd Qu.:286.4                      
-##  Max.   : 4070.000                  Max.   :297.8                      
-##  NA&#39;s   :14400                      NA&#39;s   :26144                      
-##  TempÃ.rature.maximale.sur.12.heures TempÃ.rature.minimale.du.sol.sur.12.heures
-##  Min.   :267.1                       Min.   :257.1                             
-##  1st Qu.:283.2                       1st Qu.:277.8                             
-##  Median :288.6                       Median :281.9                             
-##  Mean   :289.0                       Mean   :282.2                             
-##  3rd Qu.:294.8                       3rd Qu.:286.6                             
-##  Max.   :313.9                       Max.   :300.1                             
-##  NA&#39;s   :26144                       NA&#39;s   :12608                             
+##  Min.   : 97170         Min.   :-840.000                 
+##  1st Qu.:100850         1st Qu.: -70.000                 
+##  Median :101450         Median :   0.000                 
+##  Mean   :101361         Mean   :   7.747                 
+##  3rd Qu.:102000         3rd Qu.:  80.000                 
+##  Max.   :104370         Max.   :1150.000                 
+##  Direction.du.vent.moyen.10.mn Vitesse.du.vent.moyen.10.mn  TempÃ.rature  
+##  Min.   :  0.0                 Min.   : 0.000              Min.   :269.6  
+##  1st Qu.:180.0                 1st Qu.: 2.500              1st Qu.:281.6  
+##  Median :230.0                 Median : 3.700              Median :285.1  
+##  Mean   :212.8                 Mean   : 4.014              Mean   :285.6  
+##  3rd Qu.:270.0                 3rd Qu.: 5.200              3rd Qu.:289.6  
+##  Max.   :360.0                 Max.   :15.200              Max.   :305.4  
+##  Point.de.rosÃ.e   HumiditÃ.      VisibilitÃ..horizontale NebulositÃ..totale
+##  Min.   :262.9   Min.   : 30.00   Min.   :  180           Min.   : 10.00    
+##  1st Qu.:278.9   1st Qu.: 72.00   1st Qu.:15000           1st Qu.: 90.00    
+##  Median :282.1   Median : 84.00   Median :30000           Median :100.00    
+##  Mean   :282.1   Mean   : 80.55   Mean   :31057           Mean   : 94.53    
+##  3rd Qu.:285.6   3rd Qu.: 92.00   3rd Qu.:48905           3rd Qu.:100.00    
+##  Max.   :294.2   Max.   :100.00   Max.   :60000           Max.   :100.00    
+##  Hauteur.de.la.base.des.nuages.de.l.Ã.tage.infÃ.rieur Pression.station
+##  Min.   :  30                                         Min.   : 95860  
+##  1st Qu.: 450                                         1st Qu.: 99510  
+##  Median : 800                                         Median :100120  
+##  Mean   :1211                                         Mean   :100020  
+##  3rd Qu.:1250                                         3rd Qu.:100650  
+##  Max.   :7000                                         Max.   :102950  
+##  Variation.de.pression.en.24.heures TempÃ.rature.minimale.du.sol.sur.12.heures
+##  Min.   :-4410.00                   Min.   :265.1                             
+##  1st Qu.: -435.00                   1st Qu.:278.8                             
+##  Median :  -30.00                   Median :282.1                             
+##  Mean   :  -52.56                   Mean   :282.6                             
+##  3rd Qu.:  350.00                   3rd Qu.:286.6                             
+##  Max.   : 4070.00                   Max.   :298.9                             
 ##  Rafale.sur.les.10.derniÃ.res.minutes Rafales.sur.une.pÃ.riode
-##  Min.   : 0.000                       Min.   : 0.000          
-##  1st Qu.: 3.300                       1st Qu.: 4.000          
-##  Median : 5.200                       Median : 6.000          
-##  Mean   : 5.756                       Mean   : 6.484          
-##  3rd Qu.: 7.600                       3rd Qu.: 8.400          
-##  Max.   :29.800                       Max.   :32.400          
-##  NA&#39;s   :14252                        NA&#39;s   :67              
-##  Periode.de.mesure.de.la.rafale  Etat.du.sol     Hauteur.de.la.neige.fraÃ.che
-##  Min.   :-10                    Min.   : 0.000   Min.   :0.00                
-##  1st Qu.:-10                    1st Qu.: 0.000   1st Qu.:0.00                
-##  Median :-10                    Median : 0.000   Median :0.00                
-##  Mean   :-10                    Mean   : 0.574   Mean   :0.00                
-##  3rd Qu.:-10                    3rd Qu.: 1.000   3rd Qu.:0.00                
-##  Max.   :-10                    Max.   :17.000   Max.   :0.99                
-##  NA&#39;s   :20                     NA&#39;s   :14501    NA&#39;s   :24245               
-##  Periode.de.mesure.de.la.neige.fraiche PrÃ.cipitations.dans.la.derniÃ.re.heure
-##  Min.   :-60.00                        Min.   :-0.10000                       
-##  1st Qu.:-60.00                        1st Qu.: 0.00000                       
-##  Median :-60.00                        Median : 0.00000                       
-##  Mean   :-47.53                        Mean   : 0.06872                       
-##  3rd Qu.:-30.00                        3rd Qu.: 0.00000                       
-##  Max.   : 60.00                        Max.   :17.00000                       
-##  NA&#39;s   :25311                         NA&#39;s   :76                             
+##  Min.   : 0.000                       Min.   : 0.600          
+##  1st Qu.: 4.000                       1st Qu.: 4.950          
+##  Median : 6.000                       Median : 7.200          
+##  Mean   : 6.567                       Mean   : 7.687          
+##  3rd Qu.: 8.500                       3rd Qu.: 9.800          
+##  Max.   :27.400                       Max.   :27.400          
+##  PrÃ.cipitations.dans.la.derniÃ.re.heure
+##  Min.   :-0.1000                        
+##  1st Qu.: 0.0000                        
+##  Median : 0.0000                        
+##  Mean   : 0.1502                        
+##  3rd Qu.: 0.0000                        
+##  Max.   :11.4000                        
 ##  PrÃ.cipitations.dans.les.3.derniÃ.res.heures
 ##  Min.   :-0.1000                             
 ##  1st Qu.: 0.0000                             
 ##  Median : 0.0000                             
-##  Mean   : 0.2118                             
-##  3rd Qu.: 0.0000                             
-##  Max.   :27.0000                             
-##  NA&#39;s   :64                                  
+##  Mean   : 0.4124                             
+##  3rd Qu.: 0.2000                             
+##  Max.   :26.7000                             
 ##  PrÃ.cipitations.dans.les.6.derniÃ.res.heures
-##  Min.   :-0.100                              
-##  1st Qu.: 0.000                              
-##  Median : 0.000                              
-##  Mean   : 0.412                              
-##  3rd Qu.: 0.000                              
-##  Max.   :39.900                              
-##  NA&#39;s   :10854                               
+##  Min.   :-0.1000                             
+##  1st Qu.: 0.0000                             
+##  Median : 0.0000                             
+##  Mean   : 0.8186                             
+##  3rd Qu.: 0.6000                             
+##  Max.   :38.5000                             
 ##  PrÃ.cipitations.dans.les.12.derniÃ.res.heures
 ##  Min.   :-0.100                               
 ##  1st Qu.: 0.000                               
-##  Median : 0.000                               
-##  Mean   : 0.836                               
-##  3rd Qu.: 0.200                               
-##  Max.   :42.000                               
-##  NA&#39;s   :10962                                
-##  PrÃ.cipitations.dans.les.24.derniÃ.res.heures PhÃ.nomÃ.ne.spÃ.cial.1
-##  Min.   :-0.100                                Min.   : 710.0        
-##  1st Qu.: 0.000                                1st Qu.: 710.0        
-##  Median : 0.000                                Median : 710.0        
-##  Mean   : 1.666                                Mean   : 715.1        
-##  3rd Qu.: 1.400                                3rd Qu.: 710.0        
-##  Max.   :47.700                                Max.   :3100.0        
-##  NA&#39;s   :12892                                 NA&#39;s   :20571         
-##  PhÃ.nomÃ.ne.spÃ.cial.2 PhÃ.nomÃ.ne.spÃ.cial.3 PhÃ.nomÃ.ne.spÃ.cial.4
-##  Min.   : 710           Min.   :1113           Min.   :3100          
-##  1st Qu.:1104           1st Qu.:3100           1st Qu.:3100          
-##  Median :1106           Median :3100           Median :3100          
-##  Mean   :1102           Mean   :3062           Mean   :3100          
-##  3rd Qu.:1108           3rd Qu.:3100           3rd Qu.:3100          
-##  Max.   :1123           Max.   :3199           Max.   :3100          
-##  NA&#39;s   :20581          NA&#39;s   :26536          NA&#39;s   :34793         
-##  NÃ.bulositÃ..couche.nuageuse.1  Type.nuage.1    Hauteur.de.base.1
-##  Min.   :0.000                  Min.   : 0.000   Min.   :   0     
-##  1st Qu.:2.000                  1st Qu.: 3.000   1st Qu.: 420     
-##  Median :5.000                  Median : 6.000   Median :1110     
-##  Mean   :4.552                  Mean   : 5.202   Mean   :1853     
-##  3rd Qu.:7.000                  3rd Qu.: 7.000   3rd Qu.:2100     
-##  Max.   :9.000                  Max.   :59.000   Max.   :9000     
-##  NA&#39;s   :13846                  NA&#39;s   :25287    NA&#39;s   :14595    
-##  NÃ.bulositÃ..couche.nuageuse.2  Type.nuage.2   Hauteur.de.base.2
-##  Min.   :1.000                  Min.   :0.000   Min.   : 150     
-##  1st Qu.:5.000                  1st Qu.:3.000   1st Qu.: 960     
-##  Median :7.000                  Median :6.000   Median :1620     
-##  Mean   :6.165                  Mean   :4.352   Mean   :2453     
-##  3rd Qu.:8.000                  3rd Qu.:6.000   3rd Qu.:3200     
-##  Max.   :8.000                  Max.   :9.000   Max.   :8000     
-##  NA&#39;s   :25568                  NA&#39;s   :31175   NA&#39;s   :25711    
-##  NÃ.bulositÃ..couche.nuageuse.3  Type.nuage.3   Hauteur.de.base.3
-##  Min.   :1.00                   Min.   :0.00    Min.   : 360     
-##  1st Qu.:6.00                   1st Qu.:3.00    1st Qu.:1200     
-##  Median :7.00                   Median :6.00    Median :1800     
-##  Mean   :6.93                   Mean   :5.59    Mean   :2545     
-##  3rd Qu.:8.00                   3rd Qu.:8.00    3rd Qu.:3180     
-##  Max.   :8.00                   Max.   :9.00    Max.   :8000     
-##  NA&#39;s   :31847                  NA&#39;s   :34155   NA&#39;s   :31847    
-##   Type.nuage.4   Type.de.tendance.baromÃ.trique.1 Temps.prÃ.sent.1  
-##  Min.   :0.00    Length:34854                     Length:34854      
-##  1st Qu.:8.00    Class :character                 Class :character  
-##  Median :8.00    Mode  :character                 Mode  :character  
-##  Mean   :8.35                                                       
-##  3rd Qu.:9.00                                                       
-##  Max.   :9.00                                                       
-##  NA&#39;s   :34267                                                      
-##  TempÃ.rature..Â.C. TempÃ.rature.minimale.sur.12.heures..Â.C.
-##  Min.   :-11.30     Min.   :-11.900                          
-##  1st Qu.:  7.40     1st Qu.:  4.500                          
-##  Median : 12.10     Median :  9.000                          
-##  Mean   : 12.42     Mean   :  8.786                          
-##  3rd Qu.: 17.20     3rd Qu.: 13.300                          
-##  Max.   : 40.50     Max.   : 24.600                          
-##  NA&#39;s   :1          NA&#39;s   :26144                            
-##  TempÃ.rature.maximale.sur.12.heures..Â.C.
-##  Min.   :-6.10                            
-##  1st Qu.:10.10                            
-##  Median :15.40                            
-##  Mean   :15.84                            
-##  3rd Qu.:21.60                            
-##  Max.   :40.80                            
-##  NA&#39;s   :26144                            
-##  TempÃ.rature.maximale.sur.24.heures..Â.C.
-##  Mode:logical                             
-##  NA&#39;s:34854                               
-##                                           
-##                                           
-##                                           
-##                                           
-##                                           
-##  TempÃ.rature.minimale.du.sol.sur.12.heures..en.Â.C.    Altitude  
-##  Min.   :-16.000                                     Min.   :108  
-##  1st Qu.:  4.600                                     1st Qu.:108  
-##  Median :  8.800                                     Median :108  
-##  Mean   :  9.047                                     Mean   :108  
-##  3rd Qu.: 13.500                                     3rd Qu.:108  
-##  Max.   : 27.000                                     Max.   :108  
-##  NA&#39;s   :12608                                                    
-##  mois_de_l_annee 
-##  Min.   : 1.000  
-##  1st Qu.: 4.000  
-##  Median : 7.000  
-##  Mean   : 6.507  
-##  3rd Qu.:10.000  
-##  Max.   :12.000  
-## </code></pre>
+##  Median : 0.200                               
+##  Mean   : 1.519                               
+##  3rd Qu.: 1.600                               
+##  Max.   :38.500                               
+##  PrÃ.cipitations.dans.les.24.derniÃ.res.heures Hauteur.de.base.2
+##  Min.   :-0.100                                Min.   : 150     
+##  1st Qu.: 0.000                                1st Qu.: 840     
+##  Median : 0.800                                Median :1410     
+##  Mean   : 2.862                                Mean   :2122     
+##  3rd Qu.: 3.800                                3rd Qu.:2580     
+##  Max.   :41.200                                Max.   :8000</code></pre>
+<p>Nos observations sont complètes, et les variables toutes quantitatives, nous pouvons commencer la régression multiple.</p>
+<p>Nous n’avons pas importer en UTF-8 pour économiser de la place, donnons des labels corrects aux colonnes que nous allons utiliser.</p>
+<pre class="r"><code>labels &lt;- c(
+  &quot;Pression_Mer&quot;,
+  &quot;Variation_Pression_3h&quot;,
+  &quot;Direction_vent&quot;,
+  &quot;Vitesse_vent&quot;,
+  &quot;Temperature&quot;,
+  &quot;Point_de_rosee&quot;,
+  &quot;Humidite&quot;,
+  &quot;Visibilite_horizontale&quot;,
+  &quot;Nebulosite_total&quot;,
+  &quot;Hauteur_Base_Nuage_Inferieur&quot;,
+  &quot;Pression_Station&quot;,
+  &quot;Variation_Pression&quot;,
+  &quot;Temperature_minimale_sol&quot;,
+  &quot;Rafales&quot;,
+  &quot;Rafales_total&quot;,
+  &quot;Precipitation_1h&quot;,
+  &quot;Precipitation_3h&quot;,
+  &quot;Precipitation_6h&quot;,
+  &quot;Precipitation_12h&quot;,
+  &quot;Precipitation_24h&quot;,
+  &quot;Hauteur_Base_Nuage_Superieur&quot;
+#  &quot;Precipitation_Jour_Suivant&quot;
+            )
+names(data) &lt;- labels
+
+label &lt;- c(
+  &quot;Pression_Mer&quot;,
+  &quot;Variation_Pression_3h&quot;,
+  &quot;Direction_vent&quot;,
+  &quot;Vitesse_vent&quot;,
+  &quot;Temperature&quot;,
+  &quot;Point_de_rosee&quot;,
+  &quot;Humidite&quot;,
+  &quot;Visibilite_horizontale&quot;,
+  &quot;Nebulosite_total&quot;,
+  &quot;Hauteur_Base_Nuage_Inferieur&quot;,
+  &quot;Pression_Station&quot;,
+  &quot;Variation_Pression&quot;,
+  &quot;Temperature_minimale_sol&quot;,
+  &quot;Rafales&quot;,
+  &quot;Rafales_total&quot;,
+  &quot;Precipitation_1h&quot;,
+  &quot;Precipitation_3h&quot;,
+  &quot;Precipitation_6h&quot;,
+  &quot;Precipitation_12h&quot;,
+  &quot;Precipitation_24h&quot;,
+  &quot;Hauteur_Base_Nuage_Superieur&quot;,
+  &quot;Precipitation_Jour_Suivant&quot;
+            )
+names(prevision) &lt;- label</code></pre>
 </div>
 <div id="régression-multiple-avec-toutes-les-variables-explicatives" class="section level2">
 <h2>Régression multiple avec toutes les variables explicatives</h2>
-<p>commentaires (r² , variables significatives)</p>
-<p>tests sur les résidus gaussiens</p>
+<pre class="r"><code>reg.mul &lt;- lm(Temperature~.,data)
+summary(reg.mul)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = Temperature ~ ., data = data)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -0.8152 -0.2208 -0.0253  0.1805  3.1731 
+## 
+## Coefficients:
+##                                Estimate Std. Error  t value Pr(&gt;|t|)    
+## (Intercept)                   9.769e+01  2.155e+00   45.325  &lt; 2e-16 ***
+## Pression_Mer                 -5.896e-02  1.477e-03  -39.917  &lt; 2e-16 ***
+## Variation_Pression_3h        -2.123e-04  4.203e-05   -5.051 4.55e-07 ***
+## Direction_vent               -3.794e-05  6.551e-05   -0.579   0.5625    
+## Vitesse_vent                 -8.118e-03  1.172e-02   -0.693   0.4886    
+## Point_de_rosee                7.116e-01  8.135e-03   87.483  &lt; 2e-16 ***
+## Humidite                     -1.609e-01  1.596e-03 -100.826  &lt; 2e-16 ***
+## Visibilite_horizontale       -4.536e-06  3.168e-07  -14.319  &lt; 2e-16 ***
+## Nebulosite_total             -3.502e-04  5.135e-04   -0.682   0.4953    
+## Hauteur_Base_Nuage_Inferieur -5.152e-06  6.702e-06   -0.769   0.4421    
+## Pression_Station              5.974e-02  1.497e-03   39.901  &lt; 2e-16 ***
+## Variation_Pression           -1.089e-06  9.214e-06   -0.118   0.9060    
+## Temperature_minimale_sol      4.458e-03  2.387e-03    1.867   0.0619 .  
+## Rafales                      -9.215e-03  7.654e-03   -1.204   0.2287    
+## Rafales_total                -9.054e-03  3.964e-03   -2.284   0.0224 *  
+## Precipitation_1h             -7.657e-03  1.348e-02   -0.568   0.5701    
+## Precipitation_3h              7.777e-03  9.575e-03    0.812   0.4167    
+## Precipitation_6h              1.248e-02  5.823e-03    2.143   0.0322 *  
+## Precipitation_12h             1.137e-03  3.576e-03    0.318   0.7506    
+## Precipitation_24h             4.553e-04  1.758e-03    0.259   0.7957    
+## Hauteur_Base_Nuage_Superieur  4.093e-06  4.544e-06    0.901   0.3678    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 0.3511 on 4978 degrees of freedom
+## Multiple R-squared:  0.9962, Adjusted R-squared:  0.9962 
+## F-statistic: 6.484e+04 on 20 and 4978 DF,  p-value: &lt; 2.2e-16</code></pre>
+<p>Les résidus estimés ont une moyenne de 0.</p>
+<p>Avant que l’on retire des observations pour atteindre moins de 5000, on observe : ““” Il nous est indiqué que 3 variables sont significatives, il y en a peu car les variables doivent être très corréllés</p>
+<p>Attention, Nous ne pouvons écrire que Temperature du jour suivant = 7.464e-14 + Variation_Pression_3h * -1.321e-18 + Direction_vent * 4.089e-18 , il faut refaire le modèle avec uniquement ces variables. ““” Ces valeurs ont complètement changer par la modification de l’échantillon, cette régression est totalement dépendante de son échantillon, le résultat des tests sur les résidus nous confirmera cela. Notre R² de 1 est complètement inutile.</p>
+<p>Réalisons les intervalles de confiance</p>
+<pre class="r"><code>confint(reg.mul)</code></pre>
+<pre><code>##                                      2.5 %        97.5 %
+## (Intercept)                   9.346529e+01  1.019160e+02
+## Pression_Mer                 -6.185317e-02 -5.606196e-02
+## Variation_Pression_3h        -2.946961e-04 -1.299041e-04
+## Direction_vent               -1.663554e-04  9.048318e-05
+## Vitesse_vent                 -3.109670e-02  1.486065e-02
+## Point_de_rosee                6.956988e-01  7.275939e-01
+## Humidite                     -1.640483e-01 -1.577906e-01
+## Visibilite_horizontale       -5.157163e-06 -3.915054e-06
+## Nebulosite_total             -1.356805e-03  6.564261e-04
+## Hauteur_Base_Nuage_Inferieur -1.829186e-05  7.987818e-06
+## Pression_Station              5.680498e-02  6.267534e-02
+## Variation_Pression           -1.915299e-05  1.697566e-05
+## Temperature_minimale_sol     -2.220107e-04  9.138101e-03
+## Rafales                      -2.422061e-02  5.790580e-03
+## Rafales_total                -1.682483e-02 -1.282278e-03
+## Precipitation_1h             -3.408363e-02  1.877009e-02
+## Precipitation_3h             -1.099452e-02  2.654803e-02
+## Precipitation_6h              1.061958e-03  2.389460e-02
+## Precipitation_12h            -5.873760e-03  8.146806e-03
+## Precipitation_24h            -2.991701e-03  3.902397e-03
+## Hauteur_Base_Nuage_Superieur -4.815409e-06  1.300119e-05</code></pre>
+<p>Ainsi sur 100 échantillon de mesures météorologiques, 95 seront dans ces valeurs.</p>
 <p>histogramme des résidus</p>
+<pre class="r"><code>hist(reg.mul$residuals)</code></pre>
+<p><img src="data:image/png;base64,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" width="672" /></p>
+<p>tests sur les résidus gaussiens</p>
+<pre class="r"><code>#reg.mul$residuals
+
+shapiro.test(reg.mul$residuals)</code></pre>
+<pre><code>## 
+##  Shapiro-Wilk normality test
+## 
+## data:  reg.mul$residuals
+## W = 0.89656, p-value &lt; 2.2e-16</code></pre>
+<p>La p-value est inferieur à 5% donc on rejette H0, les Ei ne suivent pas des lois normales (résidus non gaussiens) les tests de Fisher et Student ne sont pas valables.</p>
+<p>Regression sans la Constante</p>
+<pre class="r"><code>reg.mulSansC &lt;- lm(Temperature~.-1,data)
+summary(reg.mulSansC)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = Temperature ~ . - 1, data = data)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -1.0604 -0.2715 -0.0516  0.2019  4.2871 
+## 
+## Coefficients:
+##                                Estimate Std. Error  t value Pr(&gt;|t|)    
+## Pression_Mer                  4.077e-03  5.912e-04    6.896 6.00e-12 ***
+## Variation_Pression_3h        -3.886e-04  4.974e-05   -7.813 6.75e-15 ***
+## Direction_vent               -8.788e-05  7.784e-05   -1.129  0.25893    
+## Vitesse_vent                  1.975e-03  1.393e-02    0.142  0.88726    
+## Point_de_rosee                1.045e+00  4.109e-03  254.394  &lt; 2e-16 ***
+## Humidite                     -2.242e-01  9.178e-04 -244.317  &lt; 2e-16 ***
+## Visibilite_horizontale       -5.493e-06  3.757e-07  -14.622  &lt; 2e-16 ***
+## Nebulosite_total              1.703e-04  6.101e-04    0.279  0.78018    
+## Hauteur_Base_Nuage_Inferieur -4.290e-06  7.966e-06   -0.539  0.59016    
+## Pression_Station             -4.065e-03  6.060e-04   -6.708 2.20e-11 ***
+## Variation_Pression           -2.714e-05  1.093e-05   -2.483  0.01306 *  
+## Temperature_minimale_sol      8.351e-03  2.835e-03    2.946  0.00324 ** 
+## Rafales                      -1.651e-02  9.095e-03   -1.815  0.06957 .  
+## Rafales_total                -7.585e-03  4.711e-03   -1.610  0.10746    
+## Precipitation_1h             -9.869e-03  1.602e-02   -0.616  0.53789    
+## Precipitation_3h              1.435e-02  1.138e-02    1.261  0.20742    
+## Precipitation_6h              1.037e-02  6.921e-03    1.498  0.13414    
+## Precipitation_12h             6.601e-03  4.247e-03    1.554  0.12021    
+## Precipitation_24h             5.285e-03  2.086e-03    2.534  0.01131 *  
+## Hauteur_Base_Nuage_Superieur  7.069e-06  5.400e-06    1.309  0.19058    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 0.4173 on 4979 degrees of freedom
+## Multiple R-squared:      1,  Adjusted R-squared:      1 
+## F-statistic: 1.172e+08 on 20 and 4979 DF,  p-value: &lt; 2.2e-16</code></pre>
+<p>On refait une régression avec les variables significatives</p>
+<pre class="r"><code>#reg.mulfin &lt;- lm(,data)
+#summary(reg.mulfin)</code></pre>
 </div>
 <div id="matrice-des-corrélations-des-variables-explicative" class="section level2">
 <h2>Matrice des corrélations des variables explicative</h2>

@@ -119,6 +119,7 @@ data$NÃ.bulositÃ..couche.nuageuse.1  <- NULL
 data$Etat.du.sol  <- NULL
 data$Periode.de.mesure.de.la.rafale  <- NULL
 data$NÃ.bulositÃ...des.nuages.de.l..Ã.tage.infÃ.rieur  <- NULL
+data$TempÃ.rature.minimale.du.sol.sur.12.heures..en.Â.C. <- NULL
 
 ```
 
@@ -143,7 +144,7 @@ data$mois_de_l_annee <- NULL
 
 
 Nous n'avons pas supprimé la variable date car elle nous est utile à trier chronologiquement les données.
-```{r,echo=FALSE}
+```{r,echo=TRUE}
 
 data <- data[order(as.Date(data$Date)),]
 
@@ -344,7 +345,7 @@ Mais combien si l'on retire les lignes avec des manquants ?
 
 
 
-```{r, echo=FALSE}
+```{r, results='hide'}
 which(is.na(data))
 data <- na.omit(data)
 ```
@@ -377,11 +378,11 @@ data$DateEnJour <- data$jour + (30 *data$mois) + ( 365*data$annee)
 
 
 
-On ne garde que une observation par jour, 
+On ne garde que une observation par jour pour un jeu de prévision 
 en effet le nbre d'observation par jour est irrégulier.
 ```{r}
 
-data <- do.call(rbind, by(data, list(data$DateEnJour), 
+prevision <- do.call(rbind, by(data, list(data$DateEnJour), 
                   FUN=function(x) head(x, 1)))
 
 ```
@@ -393,25 +394,51 @@ data$DateEnJour <- NULL
 data$annee <- NULL
 data$mois <- NULL
 data$jour <- NULL
+
+prevision$Date <- NULL
+prevision$DateEnJour <- NULL
+prevision$annee <- NULL
+prevision$mois <- NULL
+prevision$jour <- NULL
+
+
+
 ```
+Nous avons désormais deux jeux pour réaliser une régression linéaire,
+le premier avec 5661 observations , le second avec une observation par jour dans le but de déterminer la Température du jour à venir.
 
+Pour le jeu de prévision,
+nous creons une colonne température mais décaler de 1 jour.
 
+La première méthode utilisé n'était pas correct puisque l'on décalait dans le mauvais sens la colonne avec la méthode lag,
+puis on supprimait la première observation.
 
-Cependant nous voulons prédire la température,
-nous creons une colonne température mais décaler de 2 jours
 
 ```{r}
-
-data$TemperatureDecaler <- lag(data$TempÃ.rature)
+#Mauvaise méthode
+#data$TemperatureDecaler <- lag(data$TempÃ.rature)
 #on supprimme la première observation
-data = data[-1,]
+#data = data[-1,]
+
+
+library(Hmisc)
+#prevision$Precipitation_Jour_Suivant <- Lag(prevision$PrÃ.cipitations.dans.les.24.derniÃ.res.heures, shift = -1)
+prevision$Precipitation_Jour_Suivant <- Lag(prevision$TempÃ.rature, shift = -1)
+#on supprimme la derniere observation
+library(dplyr)
+prevision = slice(prevision, 1:(n() -1))
+
+
+#De même on réduit la taille du nbre d'observation de data
+data = slice(data, 1:(n() -662))
 
 ```
 
 ```{r}
 dim(data)
+dim(prevision)
 ```
-1655 observations de 23 variables, cela est suffisant pour la régression multiple
+4999 observations de 21 variables, cela est suffisant pour la régression multiple
 
 
 ## Statistiques Descriptives
@@ -420,35 +447,126 @@ Regardons ce qui caractérise cette base de données,
 tant au niveau des moyennes, de la variance...
 
 ```{r donnee}
-dim(data)
 summary(data)
 ```
 Nos observations sont complètes, et les variables toutes quantitatives, nous pouvons commencer la régression multiple.
 
 
+Nous n'avons pas importer en UTF-8 pour économiser de la place, donnons des labels corrects aux colonnes que nous allons utiliser.
+```{r}
+labels <- c(
+  "Pression_Mer",
+  "Variation_Pression_3h",
+  "Direction_vent",
+  "Vitesse_vent",
+  "Temperature",
+  "Point_de_rosee",
+  "Humidite",
+  "Visibilite_horizontale",
+  "Nebulosite_total",
+  "Hauteur_Base_Nuage_Inferieur",
+  "Pression_Station",
+  "Variation_Pression",
+  "Temperature_minimale_sol",
+  "Rafales",
+  "Rafales_total",
+  "Precipitation_1h",
+  "Precipitation_3h",
+  "Precipitation_6h",
+  "Precipitation_12h",
+  "Precipitation_24h",
+  "Hauteur_Base_Nuage_Superieur"
+#  "Precipitation_Jour_Suivant"
+            )
+names(data) <- labels
+
+label <- c(
+  "Pression_Mer",
+  "Variation_Pression_3h",
+  "Direction_vent",
+  "Vitesse_vent",
+  "Temperature",
+  "Point_de_rosee",
+  "Humidite",
+  "Visibilite_horizontale",
+  "Nebulosite_total",
+  "Hauteur_Base_Nuage_Inferieur",
+  "Pression_Station",
+  "Variation_Pression",
+  "Temperature_minimale_sol",
+  "Rafales",
+  "Rafales_total",
+  "Precipitation_1h",
+  "Precipitation_3h",
+  "Precipitation_6h",
+  "Precipitation_12h",
+  "Precipitation_24h",
+  "Hauteur_Base_Nuage_Superieur",
+  "Precipitation_Jour_Suivant"
+            )
+names(prevision) <- label
+
+```
 
 ## Régression multiple avec toutes les variables explicatives
 
 ```{r}
-reg.mul <- lm()
-
+reg.mul <- lm(Temperature~.,data)
+summary(reg.mul)
 
 ```
+Les résidus estimés ont une moyenne de 0.
 
-commentaires (r² , variables significatives)
+Avant que l'on retire des observations pour atteindre moins de 5000, on observe :
+"""
+Il nous est indiqué que 3 variables sont significatives, il y en a peu car les variables doivent être très corréllés
+
+Attention, Nous ne pouvons écrire que Temperature du jour suivant = 7.464e-14 + Variation_Pression_3h * -1.321e-18 + Direction_vent *  4.089e-18  ,
+il faut refaire le modèle avec uniquement ces variables. 
+"""
+Ces valeurs ont complètement changer par la modification de l'échantillon, cette régression est totalement dépendante de son échantillon,
+le résultat des tests sur les résidus nous confirmera cela. Notre R² de 1 est complètement inutile.
+
+
+Réalisons les intervalles de confiance
 ```{r}
-
+confint(reg.mul)
 ```
+Ainsi sur 100 échantillon de mesures météorologiques, 95 seront dans ces valeurs.
 
-tests sur les résidus gaussiens
-```{r}
-
-```
 
 histogramme des résidus
 ```{r}
+hist(reg.mul$residuals)
+```
+
+
+tests sur les résidus gaussiens
+```{r,echo=TRUE}
+#reg.mul$residuals
+
+shapiro.test(reg.mul$residuals)
 
 ```
+La p-value est inferieur à 5% donc on rejette H0, les Ei ne suivent pas des lois normales (résidus non gaussiens)
+les tests de Fisher et Student ne sont pas valables.
+
+Regression sans la Constante
+```{r}
+reg.mulSansC <- lm(Temperature~.-1,data)
+summary(reg.mulSansC)
+```
+
+
+On refait une régression avec les variables significatives
+```{r}
+#reg.mulfin <- lm(,data)
+#summary(reg.mulfin)
+```
+
+
+
+
 
 ## Matrice des corrélations des variables explicative
 
