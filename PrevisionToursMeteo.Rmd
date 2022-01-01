@@ -152,7 +152,7 @@ data <- data[order(as.Date(data$Date)),]
 
 Observons les valeurs manquantes des variables restantes
 Existe t'il une fonction pour tester toutes les variables ?
-```{r}
+```{r,results='hide'}
 #1
 sum(is.na(data$Pression.au.niveau.mer))
 #2
@@ -263,45 +263,65 @@ sum(is.na(data$mois_de_l_annee))
 ```
 On en déduit cela
 plus 20 000 manquants: 
-$Type.des.nuages.de.l.Ã.tage.infÃ.rieur
-$Type.des.nuages.de.l.Ã.tage.moyen
-$Type.des.nuages.de.l.Ã.tage.supÃ.rieur
-$GÃ.opotentiel
-$TempÃ.rature.minimale.sur.12.heures
-$TempÃ.rature.maximale.sur.12.heures
-$Hauteur.de.la.neige.fraÃ.che
-$Periode.de.mesure.de.la.neige.fraiche
-$PhÃ.nomÃ.ne.spÃ.cial.1
-$PhÃ.nomÃ.ne.spÃ.cial.2
-$PhÃ.nomÃ.ne.spÃ.cial.3
-$PhÃ.nomÃ.ne.spÃ.cial.4
-$Type.nuage.1
-$Hauteur.de.base.1
-$NÃ.bulositÃ..couche.nuageuse.2
-$Type.nuage.2
-$NÃ.bulositÃ..couche.nuageuse.3
-$Type.nuage.3
-$Hauteur.de.base.3
-$Type.nuage.4
-$TempÃ.rature.minimale.sur.12.heures..Â.C.
-$TempÃ.rature.maximale.sur.12.heures..Â.C.
-$TempÃ.rature.maximale.sur.24.heures..Â.C.
+* $Type.des.nuages.de.l.Ã.tage.infÃ.rieur
+* $Type.des.nuages.de.l.Ã.tage.moyen
+* $Type.des.nuages.de.l.Ã.tage.supÃ.rieur
+* $GÃ.opotentiel
+* $TempÃ.rature.minimale.sur.12.heures
+* $TempÃ.rature.maximale.sur.12.heures
+* $Hauteur.de.la.neige.fraÃ.che
+* $Periode.de.mesure.de.la.neige.fraiche
+* $PhÃ.nomÃ.ne.spÃ.cial.1
+* $PhÃ.nomÃ.ne.spÃ.cial.2
+* $PhÃ.nomÃ.ne.spÃ.cial.3
+* $PhÃ.nomÃ.ne.spÃ.cial.4
+* $Type.nuage.1
+* $Hauteur.de.base.1
+* $NÃ.bulositÃ..couche.nuageuse.2
+* $Type.nuage.2
+* $NÃ.bulositÃ..couche.nuageuse.3
+* $Type.nuage.3
+* $Hauteur.de.base.3
+* $Type.nuage.4
+* $TempÃ.rature.minimale.sur.12.heures..Â.C.
+* $TempÃ.rature.maximale.sur.12.heures..Â.C.
+* $TempÃ.rature.maximale.sur.24.heures..Â.C.
 
- plus de 10 000:
-$NebulositÃ..totale
-$Hauteur.de.la.base.des.nuages.de.l.Ã.tage.infÃ.rieur
-$Variation.de.pression.en.24.heures
-$TempÃ.rature.minimale.du.sol.sur.12.heures
-$Rafale.sur.les.10.derniÃ.res.minutes
-$Etat.du.sol
-$PrÃ.cipitations.dans.les.6.derniÃ.res.heures
-$PrÃ.cipitations.dans.les.12.derniÃ.res.heures
-$PrÃ.cipitations.dans.les.24.derniÃ.res.heures
-$NÃ.bulositÃ..couche.nuageuse.1
-$TempÃ.rature.minimale.du.sol.sur.12.heures..en.Â.C.
+Plus de 10 000:
+* $NebulositÃ..totale
+* $Hauteur.de.la.base.des.nuages.de.l.Ã.tage.infÃ.rieur
+* $Variation.de.pression.en.24.heures
+* $TempÃ.rature.minimale.du.sol.sur.12.heures
+* $Rafale.sur.les.10.derniÃ.res.minutes
+* $Etat.du.sol
+* $PrÃ.cipitations.dans.les.6.derniÃ.res.heures
+* $PrÃ.cipitations.dans.les.12.derniÃ.res.heures
+* $PrÃ.cipitations.dans.les.24.derniÃ.res.heures
+* $NÃ.bulositÃ..couche.nuageuse.1
+* $TempÃ.rature.minimale.du.sol.sur.12.heures..en.Â.C.
 
 plus de 5000:
-$NÃ.bulositÃ...des.nuages.de.l..Ã.tage.infÃ.rieur
+* $NÃ.bulositÃ...des.nuages.de.l..Ã.tage.infÃ.rieur
+
+
+Création d'un jeu de donnée où on supprimme que les plus de 30 000
+```{r}
+data2 <- data 
+
+data2$GÃ.opotentiel <- NULL
+data2$TempÃ.rature.maximale.sur.24.heures..Â.C. <- NULL
+data2$Type.nuage.4 <- NULL
+data2$PhÃ.nomÃ.ne.spÃ.cial.4 <- NULL
+data2$Type.nuage.2 <- NULL
+data2$NÃ.bulositÃ..couche.nuageuse.3 <- NULL
+data2$Type.nuage.3 <- NULL
+data2$Hauteur.de.base.3 <- NULL
+data2$Type.nuage.4 <- NULL
+```
+
+
+
+
 
 Suppression des plus de 20 000
 ```{r}
@@ -337,17 +357,19 @@ data$TempÃ.rature.maximale.sur.24.heures..Â.C. <- NULL
 Il s'agit d'une conversion de Kelvin en celsius, cette ligne n'a pas d'utilité
 ```{r}
 data$TempÃ.rature..Â.C. <- NULL
+data2$TempÃ.rature..Â.C. <- NULL
 ```
 
 
 Nous sommes alors à 32 variables
-Mais combien si l'on retire les lignes avec des manquants ?
-
-
-
-```{r, results='hide'}
+Mais combien d'observations si l'on retire les lignes avec des manquants ?
+```{r, results='hide',echo=FALSE}
 which(is.na(data))
 data <- na.omit(data)
+
+
+which(is.na(data2))
+data2 <- na.omit(data2)
 ```
 
 
@@ -454,67 +476,159 @@ Nos observations sont complètes, et les variables toutes quantitatives, nous po
 
 Nous n'avons pas importer en UTF-8 pour économiser de la place, donnons des labels corrects aux colonnes que nous allons utiliser.
 ```{r}
-labels <- c(
-  "Pression_Mer",
-  "Variation_Pression_3h",
-  "Direction_vent",
-  "Vitesse_vent",
-  "Temperature",
-  "Point_de_rosee",
-  "Humidite",
-  "Visibilite_horizontale",
-  "Nebulosite_total",
-  "Hauteur_Base_Nuage_Inferieur",
-  "Pression_Station",
-  "Variation_Pression",
-  "Temperature_minimale_sol",
-  "Rafales",
-  "Rafales_total",
-  "Precipitation_1h",
-  "Precipitation_3h",
-  "Precipitation_6h",
-  "Precipitation_12h",
-  "Precipitation_24h",
-  "Hauteur_Base_Nuage_Superieur"
+#labels <- c(
+#  "Pression_Mer",
+#  "Variation_Pression_3h",
+#  "Direction_vent",
+#  "Vitesse_vent",
+#  "Temperature",
+#  "Point_de_rosee",
+#  "Humidite",
+#  "Visibilite_horizontale",
+#  "Nebulosite_total",
+#  "Hauteur_Base_Nuage_Inferieur",
+#  "Pression_Station",
+#  "Variation_Pression",
+#  "Temperature_minimale_sol",
+#  "Rafales",
+#  "Rafales_total",
+#  "Precipitation_1h",
+#  "Precipitation_3h",
+#  "Precipitation_6h",
+#  "Precipitation_12h",
+#  "Precipitation_24h",
+#  "Hauteur_Base_Nuage_Superieur"
 #  "Precipitation_Jour_Suivant"
-            )
-names(data) <- labels
+#            )
+#names(data) <- labels
 
-label <- c(
-  "Pression_Mer",
-  "Variation_Pression_3h",
-  "Direction_vent",
-  "Vitesse_vent",
-  "Temperature",
-  "Point_de_rosee",
-  "Humidite",
-  "Visibilite_horizontale",
-  "Nebulosite_total",
-  "Hauteur_Base_Nuage_Inferieur",
-  "Pression_Station",
-  "Variation_Pression",
-  "Temperature_minimale_sol",
-  "Rafales",
-  "Rafales_total",
-  "Precipitation_1h",
-  "Precipitation_3h",
-  "Precipitation_6h",
-  "Precipitation_12h",
-  "Precipitation_24h",
-  "Hauteur_Base_Nuage_Superieur",
-  "Precipitation_Jour_Suivant"
-            )
-names(prevision) <- label
+#label <- c(
+#  "Pression_Mer",
+#  "Variation_Pression_3h",
+#  "Direction_vent",
+#  "Vitesse_vent",
+#  "Temperature",
+#  "Point_de_rosee",
+#  "Humidite",
+#  "Visibilite_horizontale",
+#  "Nebulosite_total",
+#  "Hauteur_Base_Nuage_Inferieur",
+#  "Pression_Station",
+#  "Variation_Pression",
+#  "Temperature_minimale_sol",
+#  "Rafales",
+# "Rafales_total",
+#  "Precipitation_1h",
+#  "Precipitation_3h",
+#  "Precipitation_6h",
+#  "Precipitation_12h",
+#  "Precipitation_24h",
+#  "Hauteur_Base_Nuage_Superieur",
+#  "Precipitation_Jour_Suivant"
+#            )
+#names(prevision) <- label
 
 ```
 
 ## Régression multiple avec toutes les variables explicatives
 
 ```{r}
-reg.mul <- lm(Temperature~.,data)
-summary(reg.mul)
+
+
+reg.mul <- lm(Pression.au.niveau.mer~.,data)
+shapiro.test(reg.mul$residuals)
+
+reg.mul <- lm(Variation.de.pression.en.3.heures~.,data)
+shapiro.test(reg.mul$residuals)
+
+reg.mul <- lm(Direction.du.vent.moyen.10.mn~.,data)
+shapiro.test(reg.mul$residuals)
+
+reg.mul <- lm(Vitesse.du.vent.moyen.10.mn~.,data)
+shapiro.test(reg.mul$residuals)
+
+reg.mul <- lm(TempÃ.rature~.,data)
+shapiro.test(reg.mul$residuals)
+
+reg.mul <- lm(Point.de.rosÃ.e~.,data)
+shapiro.test(reg.mul$residuals)
+
+reg.mul <- lm(HumiditÃ.~.,data)
+shapiro.test(reg.mul$residuals)
+
+reg.mul <- lm(VisibilitÃ..horizontale~.,data)
+shapiro.test(reg.mul$residuals)
+
+reg.mul <- lm(NebulositÃ..totale~.,data)
+shapiro.test(reg.mul$residuals)
+
+reg.mul <- lm(Hauteur.de.la.base.des.nuages.de.l.Ã.tage.infÃ.rieur~.,data)
+shapiro.test(reg.mul$residuals)
+
+reg.mul <- lm(Pression.station~.,data)
+shapiro.test(reg.mul$residuals)
+
+reg.mul <- lm(Variation.de.pression.en.24.heures~.,data)
+shapiro.test(reg.mul$residuals)
+
+reg.mul <- lm(TempÃ.rature.minimale.du.sol.sur.12.heures~.,data)
+shapiro.test(reg.mul$residuals)
+
+reg.mul <- lm(Rafale.sur.les.10.derniÃ.res.minutes~.,data)
+shapiro.test(reg.mul$residuals)
+
+reg.mul <- lm(Rafales.sur.une.pÃ.riode~.,data)
+shapiro.test(reg.mul$residuals)
+
+reg.mul <- lm(PrÃ.cipitations.dans.la.derniÃ.re.heure~.,data)
+shapiro.test(reg.mul$residuals)
+
+reg.mul <- lm(PrÃ.cipitations.dans.les.3.derniÃ.res.heures~.,data)
+shapiro.test(reg.mul$residuals)
+
+reg.mul <- lm(PrÃ.cipitations.dans.les.6.derniÃ.res.heures~.,data)
+shapiro.test(reg.mul$residuals)
+
+reg.mul <- lm(PrÃ.cipitations.dans.les.12.derniÃ.res.heures~.,data)
+shapiro.test(reg.mul$residuals)
+
+reg.mul <- lm(PrÃ.cipitations.dans.les.24.derniÃ.res.heures~.,data)
+shapiro.test(reg.mul$residuals)
+
+reg.mul <- lm(Hauteur.de.base.2~.,data)
+shapiro.test(reg.mul$residuals)
+
 
 ```
+Toutes les régressions testés affichent des résidus non gaussiens. Ces régressions sont inexploitable au delà de notre échantillon.
+
+
+Testons avec le jeu de prévision.
+```{r}
+
+reg.mul <- lm(TempÃ.rature~.,prevision)
+shapiro.test(reg.mul$residuals)
+
+```
+Avec des résidus non gaussiens , un R² de 1 est inutile
+![Rcarre.png](Rcarre.png)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 Les résidus estimés ont une moyenne de 0.
 
 Avant que l'on retire des observations pour atteindre moins de 5000, on observe :
@@ -528,9 +642,13 @@ Ces valeurs ont complètement changer par la modification de l'échantillon, cet
 le résultat des tests sur les résidus nous confirmera cela. Notre R² de 1 est complètement inutile.
 
 
-Réalisons les intervalles de confiance
+summary(reg.mul)
+
+
+Réalisons les intervalles de confiance et l'histogramme
 ```{r}
 confint(reg.mul)
+
 ```
 Ainsi sur 100 échantillon de mesures météorologiques, 95 seront dans ces valeurs.
 
@@ -553,8 +671,8 @@ les tests de Fisher et Student ne sont pas valables.
 
 Regression sans la Constante
 ```{r}
-reg.mulSansC <- lm(Temperature~.-1,data)
-summary(reg.mulSansC)
+#reg.mulSansC <- lm(Temperature~.-1,data)
+#summary(reg.mulSansC)
 ```
 
 
