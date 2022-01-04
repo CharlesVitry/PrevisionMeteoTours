@@ -1847,6 +1847,7 @@ data = slice(data, 1:(n() -662))</code></pre>
 <pre class="r"><code>dim(prevision)</code></pre>
 <pre><code>## [1] 1655   22</code></pre>
 <p>4999 observations de 21 variables, cela est suffisant pour la régression multiple</p>
+<div style="page-break-after: always;"></div>
 <div id="statistiques-descriptives" class="section level2">
 <h2>Statistiques Descriptives</h2>
 <p>Regardons ce qui caractérise cette base de données, tant au niveau des moyennes, de la variance…</p>
@@ -5013,12 +5014,634 @@ res.pca = PCA(prevision[,1:21],scale.unit=TRUE, ncp=21,graph=T)</code></pre>
 ## comp 20 3.073026e-03           1.463346e-02                          99.99997
 ## comp 21 5.351784e-06           2.548468e-05                         100.00000</code></pre>
 <p>on remarque que avec les pts projeté sur la composante 1, on récupère 23% de la variance total.</p>
-<pre class="r"><code>novariables &lt;- res.pca$ind$coord
-#novariables$Temperature_Jour_Suivant &lt;- prevision$Temperature_Jour_Suivant
-
-#novariables</code></pre>
+<pre class="r"><code>previsionACP &lt;- as.data.frame(res.pca$ind$coord)
+previsionACP$Temperature_Jour_Suivant &lt;- prevision$Temperature_Jour_Suivant</code></pre>
 <p>Forward regression</p>
-<pre class="r"><code>#lm.full &lt;- lm(Temperature_Jour_Suivant ~.,novariables)</code></pre>
+<pre class="r"><code>lm.full &lt;- lm(Temperature_Jour_Suivant ~.,previsionACP)
+lm.null &lt;- lm(Temperature_Jour_Suivant ~1,previsionACP)</code></pre>
+<pre class="r"><code>add1(lm.null,
+     scope=~
+       Dim.1+
+       Dim.2+
+       Dim.3+
+       Dim.4+
+       Dim.5+
+       Dim.6+
+       Dim.7+
+       Dim.8+
+       Dim.9+
+       Dim.10+
+       Dim.11+
+       Dim.12+
+       Dim.13+
+       Dim.14+
+       Dim.15+
+       Dim.16+
+       Dim.17+
+       Dim.18+
+       Dim.19+
+       Dim.20+
+       Dim.21
+     , 
+     test=&quot;F&quot;
+       )</code></pre>
+<pre><code>## Single term additions
+## 
+## Model:
+## Temperature_Jour_Suivant ~ 1
+##        Df Sum of Sq   RSS    AIC   F value    Pr(&gt;F)    
+## &lt;none&gt;              61043 5972.9                        
+## Dim.1   1    2115.1 58928 5916.5   59.3307 2.281e-14 ***
+## Dim.2   1   25097.6 35945 5098.4 1154.1626 &lt; 2.2e-16 ***
+## Dim.3   1   11319.1 49724 5635.4  376.2907 &lt; 2.2e-16 ***
+## Dim.4   1     889.4 60153 5950.6   24.4399 8.445e-07 ***
+## Dim.5   1     261.4 60781 5967.8    7.1085  0.007747 ** 
+## Dim.6   1     274.4 60768 5967.4    7.4645  0.006360 ** 
+## Dim.7   1     369.8 60673 5964.8   10.0752  0.001530 ** 
+## Dim.8   1     235.2 60807 5968.5    6.3931  0.011549 *  
+## Dim.9   1      19.7 61023 5974.3    0.5346  0.464767    
+## Dim.10  1      41.1 61002 5973.7    1.1148  0.291196    
+## Dim.11  1     146.4 60896 5970.9    3.9730  0.046398 *  
+## Dim.12  1       7.1 61036 5974.7    0.1926  0.660813    
+## Dim.13  1       1.8 61041 5974.8    0.0489  0.825097    
+## Dim.14  1      10.7 61032 5974.6    0.2895  0.590605    
+## Dim.15  1       0.3 61042 5974.9    0.0085  0.926723    
+## Dim.16  1      13.8 61029 5974.5    0.3744  0.540703    
+## Dim.17  1      29.9 61013 5974.1    0.8096  0.368361    
+## Dim.18  1       8.2 61034 5974.6    0.2216  0.637900    
+## Dim.19  1       3.3 61039 5974.8    0.0896  0.764768    
+## Dim.20  1       5.3 61037 5974.7    0.1425  0.705896    
+## Dim.21  1      12.3 61030 5974.5    0.3321  0.564501    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<pre class="r"><code>add1(update(lm.null,~.+Dim.2
+            ),
+     scope=~
+       Dim.1+
+       Dim.2+
+       Dim.3+
+       Dim.4+
+       Dim.5+
+       Dim.6+
+       Dim.7+
+       Dim.8+
+       Dim.9+
+       Dim.10+
+       Dim.11+
+       Dim.12+
+       Dim.13+
+       Dim.14+
+       Dim.15+
+       Dim.16+
+       Dim.17+
+       Dim.18+
+       Dim.19+
+       Dim.20+
+       Dim.21
+     , 
+     test=&quot;F&quot;
+     
+     
+     )</code></pre>
+<pre><code>## Single term additions
+## 
+## Model:
+## Temperature_Jour_Suivant ~ Dim.2
+##        Df Sum of Sq   RSS    AIC  F value    Pr(&gt;F)    
+## &lt;none&gt;              35945 5098.4                       
+## Dim.1   1    2115.1 33830 5000.0 103.2842 &lt; 2.2e-16 ***
+## Dim.3   1   11319.1 24626 4474.5 759.3301 &lt; 2.2e-16 ***
+## Dim.4   1     889.4 35056 5058.9  41.9120 1.255e-10 ***
+## Dim.5   1     261.4 35684 5088.3  12.1009 0.0005171 ***
+## Dim.6   1     274.4 35671 5087.7  12.7088 0.0003743 ***
+## Dim.7   1     369.8 35575 5083.3  17.1726 3.586e-05 ***
+## Dim.8   1     235.2 35710 5089.5  10.8797 0.0009929 ***
+## Dim.9   1      19.7 35925 5099.5   0.9076 0.3408938    
+## Dim.10  1      41.1 35904 5098.5   1.8929 0.1690594    
+## Dim.11  1     146.4 35799 5093.7   6.7544 0.0094351 ** 
+## Dim.12  1       7.1 35938 5100.1   0.3269 0.5675572    
+## Dim.13  1       1.8 35943 5100.3   0.0829 0.7734198    
+## Dim.14  1      10.7 35934 5099.9   0.4914 0.4833925    
+## Dim.15  1       0.3 35945 5100.4   0.0144 0.9046304    
+## Dim.16  1      13.8 35931 5099.8   0.6355 0.4254526    
+## Dim.17  1      29.9 35915 5099.0   1.3746 0.2411970    
+## Dim.18  1       8.2 35937 5100.0   0.3761 0.5397809    
+## Dim.19  1       3.3 35942 5100.3   0.1520 0.6966665    
+## Dim.20  1       5.3 35940 5100.2   0.2418 0.6229765    
+## Dim.21  1      12.3 35933 5099.8   0.5637 0.4528706    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<pre class="r"><code>add1(update(lm.null,~. + Dim.2 + Dim.3
+            ),
+     scope=~
+       Dim.1+
+       Dim.2+
+       Dim.3+
+       Dim.4+
+       Dim.5+
+       Dim.6+
+       Dim.7+
+       Dim.8+
+       Dim.9+
+       Dim.10+
+       Dim.11+
+       Dim.12+
+       Dim.13+
+       Dim.14+
+       Dim.15+
+       Dim.16+
+       Dim.17+
+       Dim.18+
+       Dim.19+
+       Dim.20+
+       Dim.21
+     , 
+     test=&quot;F&quot;
+     
+     
+     )</code></pre>
+<pre><code>## Single term additions
+## 
+## Model:
+## Temperature_Jour_Suivant ~ Dim.2 + Dim.3
+##        Df Sum of Sq   RSS    AIC  F value    Pr(&gt;F)    
+## &lt;none&gt;              24626 4474.5                       
+## Dim.1   1   2115.07 22511 4327.9 155.1246 &lt; 2.2e-16 ***
+## Dim.4   1    889.38 23737 4415.6  61.8609 6.607e-15 ***
+## Dim.5   1    261.38 24365 4458.8  17.7119 2.708e-05 ***
+## Dim.6   1    274.41 24352 4458.0  18.6049 1.703e-05 ***
+## Dim.7   1    369.81 24256 4451.5  25.1710 5.812e-07 ***
+## Dim.8   1    235.18 24391 4460.6  15.9191 6.900e-05 ***
+## Dim.9   1     19.74 24606 4475.2   1.3243  0.249990    
+## Dim.10  1     41.14 24585 4473.7   2.7628  0.096671 .  
+## Dim.11  1    146.37 24480 4466.6   9.8715  0.001708 ** 
+## Dim.12  1      7.11 24619 4476.0   0.4769  0.489909    
+## Dim.13  1      1.80 24624 4476.4   0.1210  0.728043    
+## Dim.14  1     10.69 24615 4475.8   0.7170  0.397264    
+## Dim.15  1      0.31 24626 4476.5   0.0209  0.884939    
+## Dim.16  1     13.82 24612 4475.6   0.9272  0.335724    
+## Dim.17  1     29.88 24596 4474.5   2.0059  0.156873    
+## Dim.18  1      8.18 24618 4475.9   0.5487  0.458954    
+## Dim.19  1      3.31 24623 4476.3   0.2218  0.637761    
+## Dim.20  1      5.26 24621 4476.1   0.3527  0.552643    
+## Dim.21  1     12.26 24614 4475.7   0.8225  0.364592    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<pre class="r"><code>add1(update(lm.null,~.+Dim.1 +  Dim.2 +    Dim.3
+            ),
+     scope=~
+       Dim.1+
+       Dim.2+
+       Dim.3+
+       Dim.4+
+       Dim.5+
+       Dim.6+
+       Dim.7+
+       Dim.8+
+       Dim.9+
+       Dim.10+
+       Dim.11+
+       Dim.12+
+       Dim.13+
+       Dim.14+
+       Dim.15+
+       Dim.16+
+       Dim.17+
+       Dim.18+
+       Dim.19+
+       Dim.20+
+       Dim.21
+     , 
+     test=&quot;F&quot;
+     
+     
+     )</code></pre>
+<pre><code>## Single term additions
+## 
+## Model:
+## Temperature_Jour_Suivant ~ Dim.1 + Dim.2 + Dim.3
+##        Df Sum of Sq   RSS    AIC F value    Pr(&gt;F)    
+## &lt;none&gt;              22511 4327.9                      
+## Dim.4   1    889.38 21622 4263.2 67.8711 3.513e-16 ***
+## Dim.5   1    261.38 22249 4310.5 19.3839 1.138e-05 ***
+## Dim.6   1    274.41 22236 4309.6 20.3622 6.862e-06 ***
+## Dim.7   1    369.81 22141 4302.5 27.5588 1.722e-07 ***
+## Dim.8   1    235.18 22276 4312.5 17.4200 3.153e-05 ***
+## Dim.9   1     19.74 22491 4328.4  1.4480  0.229030    
+## Dim.10  1     41.14 22470 4326.8  3.0210  0.082379 .  
+## Dim.11  1    146.37 22365 4319.1 10.7986  0.001037 ** 
+## Dim.12  1      7.11 22504 4329.4  0.5214  0.470327    
+## Dim.13  1      1.80 22509 4329.7  0.1322  0.716164    
+## Dim.14  1     10.69 22500 4329.1  0.7839  0.376084    
+## Dim.15  1      0.31 22511 4329.9  0.0229  0.879731    
+## Dim.16  1     13.82 22497 4328.9  1.0138  0.314143    
+## Dim.17  1     29.88 22481 4327.7  2.1933  0.138800    
+## Dim.18  1      8.18 22503 4329.3  0.5999  0.438723    
+## Dim.19  1      3.31 22508 4329.6  0.2425  0.622503    
+## Dim.20  1      5.26 22506 4329.5  0.3857  0.534673    
+## Dim.21  1     12.26 22499 4329.0  0.8992  0.343124    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<pre class="r"><code>add1(update(lm.null,~.+Dim.1 +  Dim.2 +    Dim.3 +   Dim.4
+            ),
+     scope=~
+       Dim.1+
+       Dim.2+
+       Dim.3+
+       Dim.4+
+       Dim.5+
+       Dim.6+
+       Dim.7+
+       Dim.8+
+       Dim.9+
+       Dim.10+
+       Dim.11+
+       Dim.12+
+       Dim.13+
+       Dim.14+
+       Dim.15+
+       Dim.16+
+       Dim.17+
+       Dim.18+
+       Dim.19+
+       Dim.20+
+       Dim.21
+     , 
+     test=&quot;F&quot;
+     
+     
+     )</code></pre>
+<pre><code>## Single term additions
+## 
+## Model:
+## Temperature_Jour_Suivant ~ Dim.1 + Dim.2 + Dim.3 + Dim.4
+##        Df Sum of Sq   RSS    AIC F value    Pr(&gt;F)    
+## &lt;none&gt;              21622 4263.2                      
+## Dim.5   1    261.38 21360 4245.0 20.1788 7.543e-06 ***
+## Dim.6   1    274.41 21347 4244.0 21.1977 4.460e-06 ***
+## Dim.7   1    369.81 21252 4236.6 28.6947 9.668e-08 ***
+## Dim.8   1    235.18 21386 4247.1 18.1335 2.176e-05 ***
+## Dim.9   1     19.74 21602 4263.6  1.5067 0.2198260    
+## Dim.10  1     41.14 21580 4262.0  3.1436 0.0764101 .  
+## Dim.11  1    146.37 21475 4253.9 11.2390 0.0008191 ***
+## Dim.12  1      7.11 21614 4264.6  0.5426 0.4614719    
+## Dim.13  1      1.80 21620 4265.0  0.1376 0.7107263    
+## Dim.14  1     10.69 21611 4264.3  0.8157 0.3665867    
+## Dim.15  1      0.31 21621 4265.1  0.0238 0.8773382    
+## Dim.16  1     13.82 21608 4264.1  1.0549 0.3045360    
+## Dim.17  1     29.88 21592 4262.9  2.2823 0.1310499    
+## Dim.18  1      8.18 21613 4264.5  0.6242 0.4295977    
+## Dim.19  1      3.31 21618 4264.9  0.2523 0.6155424    
+## Dim.20  1      5.26 21616 4264.8  0.4013 0.5265120    
+## Dim.21  1     12.26 21609 4264.2  0.9357 0.3335322    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<pre class="r"><code>add1(update(lm.null,~.+Dim.1 +  Dim.2 +    Dim.3 +   Dim.4 +   Dim.7 
+            ),
+     scope=~
+       Dim.1+
+       Dim.2+
+       Dim.3+
+       Dim.4+
+       Dim.5+
+       Dim.6+
+       Dim.7+
+       Dim.8+
+       Dim.9+
+       Dim.10+
+       Dim.11+
+       Dim.12+
+       Dim.13+
+       Dim.14+
+       Dim.15+
+       Dim.16+
+       Dim.17+
+       Dim.18+
+       Dim.19+
+       Dim.20+
+       Dim.21
+     , 
+     test=&quot;F&quot;
+     
+     
+     )</code></pre>
+<pre><code>## Single term additions
+## 
+## Model:
+## Temperature_Jour_Suivant ~ Dim.1 + Dim.2 + Dim.3 + Dim.4 + Dim.7
+##        Df Sum of Sq   RSS    AIC F value    Pr(&gt;F)    
+## &lt;none&gt;              21252 4236.6                      
+## Dim.5   1   261.382 20990 4218.1 20.5218 6.319e-06 ***
+## Dim.6   1   274.413 20977 4217.1 21.5583 3.704e-06 ***
+## Dim.8   1   235.177 21017 4220.2 18.4413 1.854e-05 ***
+## Dim.9   1    19.737 21232 4237.1  1.5320   0.21599    
+## Dim.10  1    41.140 21211 4235.4  3.1965   0.07398 .  
+## Dim.11  1   146.366 21105 4227.2 11.4290   0.00074 ***
+## Dim.12  1     7.112 21245 4238.1  0.5517   0.45774    
+## Dim.13  1     1.804 21250 4238.5  0.1399   0.70842    
+## Dim.14  1    10.689 21241 4237.8  0.8293   0.36259    
+## Dim.15  1     0.312 21251 4238.6  0.0242   0.87632    
+## Dim.16  1    13.823 21238 4237.5  1.0726   0.30051    
+## Dim.17  1    29.884 21222 4236.3  2.3207   0.12786    
+## Dim.18  1     8.182 21244 4238.0  0.6347   0.42575    
+## Dim.19  1     3.307 21248 4238.4  0.2565   0.61259    
+## Dim.20  1     5.260 21246 4238.2  0.4080   0.52306    
+## Dim.21  1    12.262 21239 4237.7  0.9514   0.32951    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<pre class="r"><code>add1(update(lm.null,~.+Dim.1 +  Dim.2 +    Dim.3 +   Dim.4 + Dim.6+  Dim.7  
+            ),
+     scope=~
+       Dim.1+
+       Dim.2+
+       Dim.3+
+       Dim.4+
+       Dim.5+
+       Dim.6+
+       Dim.7+
+       Dim.8+
+       Dim.9+
+       Dim.10+
+       Dim.11+
+       Dim.12+
+       Dim.13+
+       Dim.14+
+       Dim.15+
+       Dim.16+
+       Dim.17+
+       Dim.18+
+       Dim.19+
+       Dim.20+
+       Dim.21
+     , 
+     test=&quot;F&quot;
+     
+     
+     )</code></pre>
+<pre><code>## Single term additions
+## 
+## Model:
+## Temperature_Jour_Suivant ~ Dim.1 + Dim.2 + Dim.3 + Dim.4 + Dim.6 + 
+##     Dim.7
+##        Df Sum of Sq   RSS    AIC F value    Pr(&gt;F)    
+## &lt;none&gt;              20977 4217.1                      
+## Dim.5   1   261.382 20716 4198.3 20.7810 5.529e-06 ***
+## Dim.8   1   235.177 20742 4200.4 18.6740 1.644e-05 ***
+## Dim.9   1    19.737 20958 4217.5  1.5511 0.2131531    
+## Dim.10  1    41.140 20936 4215.8  3.2364 0.0722019 .  
+## Dim.11  1   146.366 20831 4207.5 11.5725 0.0006854 ***
+## Dim.12  1     7.112 20970 4218.5  0.5586 0.4549453    
+## Dim.13  1     1.804 20975 4219.0  0.1417 0.7066906    
+## Dim.14  1    10.689 20967 4218.3  0.8397 0.3596187    
+## Dim.15  1     0.312 20977 4219.1  0.0245 0.8755590    
+## Dim.16  1    13.823 20963 4218.0  1.0860 0.2975164    
+## Dim.17  1    29.884 20947 4216.7  2.3496 0.1255049    
+## Dim.18  1     8.182 20969 4218.5  0.6426 0.4228810    
+## Dim.19  1     3.307 20974 4218.8  0.2597 0.6103865    
+## Dim.20  1     5.260 20972 4218.7  0.4131 0.5204824    
+## Dim.21  1    12.262 20965 4218.1  0.9633 0.3265095    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<pre class="r"><code>add1(update(lm.null,~.+Dim.1 +  Dim.2 +    Dim.3 +   Dim.4 +Dim.5+ Dim.6+  Dim.7  
+            ),
+     scope=~
+       Dim.1+
+       Dim.2+
+       Dim.3+
+       Dim.4+
+       Dim.5+
+       Dim.6+
+       Dim.7+
+       Dim.8+
+       Dim.9+
+       Dim.10+
+       Dim.11+
+       Dim.12+
+       Dim.13+
+       Dim.14+
+       Dim.15+
+       Dim.16+
+       Dim.17+
+       Dim.18+
+       Dim.19+
+       Dim.20+
+       Dim.21
+     , 
+     test=&quot;F&quot;
+     
+     
+     )</code></pre>
+<pre><code>## Single term additions
+## 
+## Model:
+## Temperature_Jour_Suivant ~ Dim.1 + Dim.2 + Dim.3 + Dim.4 + Dim.5 + 
+##     Dim.6 + Dim.7
+##        Df Sum of Sq   RSS    AIC F value    Pr(&gt;F)    
+## &lt;none&gt;              20716 4198.3                      
+## Dim.8   1   235.177 20481 4181.5 18.9008 1.461e-05 ***
+## Dim.9   1    19.737 20696 4198.8  1.5697  0.210426    
+## Dim.10  1    41.140 20675 4197.1  3.2753  0.070511 .  
+## Dim.11  1   146.366 20570 4188.6 11.7124  0.000636 ***
+## Dim.12  1     7.112 20709 4199.8  0.5653  0.452251    
+## Dim.13  1     1.804 20714 4200.2  0.1434  0.705018    
+## Dim.14  1    10.689 20705 4199.5  0.8498  0.356750    
+## Dim.15  1     0.312 20716 4200.3  0.0248  0.874821    
+## Dim.16  1    13.823 20702 4199.2  1.0990  0.294634    
+## Dim.17  1    29.884 20686 4198.0  2.3779  0.123257    
+## Dim.18  1     8.182 20708 4199.7  0.6503  0.420111    
+## Dim.19  1     3.307 20713 4200.1  0.2628  0.608252    
+## Dim.20  1     5.260 20711 4199.9  0.4181  0.517990    
+## Dim.21  1    12.262 20704 4199.4  0.9748  0.323622    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<pre class="r"><code>add1(update(lm.null,~.+Dim.1 +  Dim.2 +    Dim.3 +   Dim.4 +    Dim.5 +  Dim.6 + Dim.7 +  Dim.8
+            ),
+     scope=~
+       Dim.1+
+       Dim.2+
+       Dim.3+
+       Dim.4+
+       Dim.5+
+       Dim.6+
+       Dim.7+
+       Dim.8+
+       Dim.9+
+       Dim.10+
+       Dim.11+
+       Dim.12+
+       Dim.13+
+       Dim.14+
+       Dim.15+
+       Dim.16+
+       Dim.17+
+       Dim.18+
+       Dim.19+
+       Dim.20+
+       Dim.21
+     , 
+     test=&quot;F&quot;
+     
+     
+     )</code></pre>
+<pre><code>## Single term additions
+## 
+## Model:
+## Temperature_Jour_Suivant ~ Dim.1 + Dim.2 + Dim.3 + Dim.4 + Dim.5 + 
+##     Dim.6 + Dim.7 + Dim.8
+##        Df Sum of Sq   RSS    AIC F value   Pr(&gt;F)    
+## &lt;none&gt;              20481 4181.5                     
+## Dim.9   1    19.737 20461 4181.9  1.5868 0.207963    
+## Dim.10  1    41.140 20440 4180.1  3.3110 0.068999 .  
+## Dim.11  1   146.366 20334 4171.6 11.8407 0.000594 ***
+## Dim.12  1     7.112 20474 4182.9  0.5714 0.449804    
+## Dim.13  1     1.804 20479 4183.3  0.1449 0.703494    
+## Dim.14  1    10.689 20470 4182.6  0.8590 0.354150    
+## Dim.15  1     0.312 20480 4183.4  0.0251 0.874148    
+## Dim.16  1    13.823 20467 4182.3  1.1110 0.292024    
+## Dim.17  1    29.884 20451 4181.0  2.4038 0.121237    
+## Dim.18  1     8.182 20473 4182.8  0.6574 0.417596    
+## Dim.19  1     3.307 20477 4183.2  0.2657 0.606309    
+## Dim.20  1     5.260 20475 4183.0  0.4226 0.515724    
+## Dim.21  1    12.262 20468 4182.5  0.9854 0.321006    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<pre class="r"><code>add1(update(lm.null,~.+Dim.1 +  Dim.2 +    Dim.3 +   Dim.4 +    Dim.5 +  Dim.6 + Dim.7 +  Dim.8 +  Dim.11
+            ),
+     scope=~
+       Dim.1+
+       Dim.2+
+       Dim.3+
+       Dim.4+
+       Dim.5+
+       Dim.6+
+       Dim.7+
+       Dim.8+
+       Dim.9+
+       Dim.10+
+       Dim.11+
+       Dim.12+
+       Dim.13+
+       Dim.14+
+       Dim.15+
+       Dim.16+
+       Dim.17+
+       Dim.18+
+       Dim.19+
+       Dim.20+
+       Dim.21
+     , 
+     test=&quot;F&quot;
+     
+     
+     )</code></pre>
+<pre><code>## Single term additions
+## 
+## Model:
+## Temperature_Jour_Suivant ~ Dim.1 + Dim.2 + Dim.3 + Dim.4 + Dim.5 + 
+##     Dim.6 + Dim.7 + Dim.8 + Dim.11
+##        Df Sum of Sq   RSS    AIC F value  Pr(&gt;F)  
+## &lt;none&gt;              20334 4171.6                  
+## Dim.9   1    19.737 20315 4172.0  1.5973 0.20647  
+## Dim.10  1    41.140 20293 4170.2  3.3328 0.06809 .
+## Dim.12  1     7.112 20327 4173.0  0.5752 0.44832  
+## Dim.13  1     1.804 20333 4173.4  0.1459 0.70257  
+## Dim.14  1    10.689 20324 4172.7  0.8647 0.35257  
+## Dim.15  1     0.312 20334 4173.6  0.0253 0.87374  
+## Dim.16  1    13.823 20321 4172.5  1.1183 0.29044  
+## Dim.17  1    29.884 20304 4171.1  2.4196 0.12002  
+## Dim.18  1     8.182 20326 4172.9  0.6617 0.41607  
+## Dim.19  1     3.307 20331 4173.3  0.2674 0.60513  
+## Dim.20  1     5.260 20329 4173.2  0.4254 0.51434  
+## Dim.21  1    12.262 20322 4172.6  0.9919 0.31942  
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<pre class="r"><code>add1(update(lm.null,~.+Dim.1 +  Dim.2 +    Dim.3 +   Dim.4 +    Dim.5 +  Dim.6 + Dim.7 +  Dim.8 +  Dim.11 +   Dim.10
+            ),
+     scope=~
+       Dim.1+
+       Dim.2+
+       Dim.3+
+       Dim.4+
+       Dim.5+
+       Dim.6+
+       Dim.7+
+       Dim.8+
+       Dim.9+
+       Dim.10+
+       Dim.11+
+       Dim.12+
+       Dim.13+
+       Dim.14+
+       Dim.15+
+       Dim.16+
+       Dim.17+
+       Dim.18+
+       Dim.19+
+       Dim.20+
+       Dim.21
+     , 
+     test=&quot;F&quot;
+     
+     
+     )</code></pre>
+<pre><code>## Single term additions
+## 
+## Model:
+## Temperature_Jour_Suivant ~ Dim.1 + Dim.2 + Dim.3 + Dim.4 + Dim.5 + 
+##     Dim.6 + Dim.7 + Dim.8 + Dim.11 + Dim.10
+##        Df Sum of Sq   RSS    AIC F value Pr(&gt;F)
+## &lt;none&gt;              20293 4170.2               
+## Dim.9   1   19.7370 20273 4170.6  1.5995 0.2062
+## Dim.12  1    7.1118 20286 4171.6  0.5760 0.4480
+## Dim.13  1    1.8040 20291 4172.1  0.1461 0.7024
+## Dim.14  1   10.6894 20283 4171.4  0.8659 0.3522
+## Dim.15  1    0.3124 20293 4172.2  0.0253 0.8736
+## Dim.16  1   13.8226 20279 4171.1  1.1199 0.2901
+## Dim.17  1   29.8837 20263 4169.8  2.4231 0.1198
+## Dim.18  1    8.1816 20285 4171.6  0.6627 0.4157
+## Dim.19  1    3.3073 20290 4172.0  0.2678 0.6049
+## Dim.20  1    5.2604 20288 4171.8  0.4260 0.5140
+## Dim.21  1   12.2616 20281 4171.2  0.9933 0.3191</code></pre>
+<p>J’ai refait cette regression en prenant soit le plus petit RSS ou soit les dimensions dans l’ordre, le résultat est le meme.</p>
+<pre class="r"><code>reg.ACP &lt;- lm(Temperature_Jour_Suivant~Dim.1 +  Dim.2 +    Dim.3 +   Dim.4 +    Dim.5 +  Dim.6 + Dim.7 +  Dim.8 +  Dim.11 +   Dim.10,previsionACP)
+
+summary(reg.ACP)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = Temperature_Jour_Suivant ~ Dim.1 + Dim.2 + Dim.3 + 
+##     Dim.4 + Dim.5 + Dim.6 + Dim.7 + Dim.8 + Dim.11 + Dim.10, 
+##     data = previsionACP)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -13.0378  -2.3754  -0.1332   2.0948  15.2685 
+## 
+## Coefficients:
+##              Estimate Std. Error  t value Pr(&gt;|t|)    
+## (Intercept) 285.82577    0.08636 3309.607  &lt; 2e-16 ***
+## Dim.1        -0.50683    0.03872  -13.090  &lt; 2e-16 ***
+## Dim.2         2.18175    0.04839   45.091  &lt; 2e-16 ***
+## Dim.3         1.55375    0.05131   30.282  &lt; 2e-16 ***
+## Dim.4         0.50840    0.05989    8.488  &lt; 2e-16 ***
+## Dim.5        -0.32164    0.06990   -4.602 4.51e-06 ***
+## Dim.6        -0.36316    0.07702   -4.715 2.62e-06 ***
+## Dim.7        -0.47258    0.08634   -5.473 5.10e-08 ***
+## Dim.8         0.41756    0.09566    4.365 1.35e-05 ***
+## Dim.11        0.42103    0.12227    3.443 0.000589 ***
+## Dim.10       -0.18470    0.10117   -1.826 0.068090 .  
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 3.513 on 1644 degrees of freedom
+## Multiple R-squared:  0.6676, Adjusted R-squared:  0.6655 
+## F-statistic: 330.1 on 10 and 1644 DF,  p-value: &lt; 2.2e-16</code></pre>
+<pre class="r"><code>shapiro.test(reg.ACP$residuals)</code></pre>
+<pre><code>## 
+##  Shapiro-Wilk normality test
+## 
+## data:  reg.ACP$residuals
+## W = 0.99281, p-value = 3.202e-07</code></pre>
+<p>C’est le meilleur résultat obtenu. Il n’est pas suffisant non plus.</p>
 </div>
 <div id="régression-ridge" class="section level2">
 <h2>Régression Ridge</h2>

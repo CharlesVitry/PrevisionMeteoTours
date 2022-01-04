@@ -1313,37 +1313,382 @@ on remarque que avec les pts projeté sur la composante 1, on récupère 23% de 
 
 
 ```{r}
-novariables <- res.pca$ind$coord
-#novariables$Temperature_Jour_Suivant <- prevision$Temperature_Jour_Suivant
+previsionACP <- as.data.frame(res.pca$ind$coord)
+previsionACP$Temperature_Jour_Suivant <- prevision$Temperature_Jour_Suivant
 
-#novariables
+
 ```
 
 
 Forward regression 
 ```{r}
-#lm.full <- lm(Temperature_Jour_Suivant ~.,novariables)
+lm.full <- lm(Temperature_Jour_Suivant ~.,previsionACP)
+lm.null <- lm(Temperature_Jour_Suivant ~1,previsionACP)
 ```
 
 ```{r}
-
+add1(lm.null,
+     scope=~
+       Dim.1+
+       Dim.2+
+       Dim.3+
+       Dim.4+
+       Dim.5+
+       Dim.6+
+       Dim.7+
+       Dim.8+
+       Dim.9+
+       Dim.10+
+       Dim.11+
+       Dim.12+
+       Dim.13+
+       Dim.14+
+       Dim.15+
+       Dim.16+
+       Dim.17+
+       Dim.18+
+       Dim.19+
+       Dim.20+
+       Dim.21
+     , 
+     test="F"
+       )
 ```
 
 ```{r}
-
+add1(update(lm.null,~.+Dim.2
+            ),
+     scope=~
+       Dim.1+
+       Dim.2+
+       Dim.3+
+       Dim.4+
+       Dim.5+
+       Dim.6+
+       Dim.7+
+       Dim.8+
+       Dim.9+
+       Dim.10+
+       Dim.11+
+       Dim.12+
+       Dim.13+
+       Dim.14+
+       Dim.15+
+       Dim.16+
+       Dim.17+
+       Dim.18+
+       Dim.19+
+       Dim.20+
+       Dim.21
+     , 
+     test="F"
+     
+     
+     )
 ```
 
 ```{r}
-
+add1(update(lm.null,~. + Dim.2 + Dim.3
+            ),
+     scope=~
+       Dim.1+
+       Dim.2+
+       Dim.3+
+       Dim.4+
+       Dim.5+
+       Dim.6+
+       Dim.7+
+       Dim.8+
+       Dim.9+
+       Dim.10+
+       Dim.11+
+       Dim.12+
+       Dim.13+
+       Dim.14+
+       Dim.15+
+       Dim.16+
+       Dim.17+
+       Dim.18+
+       Dim.19+
+       Dim.20+
+       Dim.21
+     , 
+     test="F"
+     
+     
+     )
 ```
 
 ```{r}
-
+add1(update(lm.null,~.+Dim.1 +  Dim.2 +    Dim.3
+            ),
+     scope=~
+       Dim.1+
+       Dim.2+
+       Dim.3+
+       Dim.4+
+       Dim.5+
+       Dim.6+
+       Dim.7+
+       Dim.8+
+       Dim.9+
+       Dim.10+
+       Dim.11+
+       Dim.12+
+       Dim.13+
+       Dim.14+
+       Dim.15+
+       Dim.16+
+       Dim.17+
+       Dim.18+
+       Dim.19+
+       Dim.20+
+       Dim.21
+     , 
+     test="F"
+     
+     
+     )
 ```
 
 ```{r}
-
+add1(update(lm.null,~.+Dim.1 +  Dim.2 +    Dim.3 +   Dim.4
+            ),
+     scope=~
+       Dim.1+
+       Dim.2+
+       Dim.3+
+       Dim.4+
+       Dim.5+
+       Dim.6+
+       Dim.7+
+       Dim.8+
+       Dim.9+
+       Dim.10+
+       Dim.11+
+       Dim.12+
+       Dim.13+
+       Dim.14+
+       Dim.15+
+       Dim.16+
+       Dim.17+
+       Dim.18+
+       Dim.19+
+       Dim.20+
+       Dim.21
+     , 
+     test="F"
+     
+     
+     )
 ```
+
+```{r}
+add1(update(lm.null,~.+Dim.1 +  Dim.2 +    Dim.3 +   Dim.4 +   Dim.7 
+            ),
+     scope=~
+       Dim.1+
+       Dim.2+
+       Dim.3+
+       Dim.4+
+       Dim.5+
+       Dim.6+
+       Dim.7+
+       Dim.8+
+       Dim.9+
+       Dim.10+
+       Dim.11+
+       Dim.12+
+       Dim.13+
+       Dim.14+
+       Dim.15+
+       Dim.16+
+       Dim.17+
+       Dim.18+
+       Dim.19+
+       Dim.20+
+       Dim.21
+     , 
+     test="F"
+     
+     
+     )
+```
+
+```{r}
+add1(update(lm.null,~.+Dim.1 +  Dim.2 +    Dim.3 +   Dim.4 + Dim.6+  Dim.7  
+            ),
+     scope=~
+       Dim.1+
+       Dim.2+
+       Dim.3+
+       Dim.4+
+       Dim.5+
+       Dim.6+
+       Dim.7+
+       Dim.8+
+       Dim.9+
+       Dim.10+
+       Dim.11+
+       Dim.12+
+       Dim.13+
+       Dim.14+
+       Dim.15+
+       Dim.16+
+       Dim.17+
+       Dim.18+
+       Dim.19+
+       Dim.20+
+       Dim.21
+     , 
+     test="F"
+     
+     
+     )
+```
+
+```{r}
+add1(update(lm.null,~.+Dim.1 +  Dim.2 +    Dim.3 +   Dim.4 +Dim.5+ Dim.6+  Dim.7  
+            ),
+     scope=~
+       Dim.1+
+       Dim.2+
+       Dim.3+
+       Dim.4+
+       Dim.5+
+       Dim.6+
+       Dim.7+
+       Dim.8+
+       Dim.9+
+       Dim.10+
+       Dim.11+
+       Dim.12+
+       Dim.13+
+       Dim.14+
+       Dim.15+
+       Dim.16+
+       Dim.17+
+       Dim.18+
+       Dim.19+
+       Dim.20+
+       Dim.21
+     , 
+     test="F"
+     
+     
+     )
+```
+
+```{r}
+add1(update(lm.null,~.+Dim.1 +  Dim.2 +    Dim.3 +   Dim.4 +    Dim.5 +  Dim.6 + Dim.7 +  Dim.8
+            ),
+     scope=~
+       Dim.1+
+       Dim.2+
+       Dim.3+
+       Dim.4+
+       Dim.5+
+       Dim.6+
+       Dim.7+
+       Dim.8+
+       Dim.9+
+       Dim.10+
+       Dim.11+
+       Dim.12+
+       Dim.13+
+       Dim.14+
+       Dim.15+
+       Dim.16+
+       Dim.17+
+       Dim.18+
+       Dim.19+
+       Dim.20+
+       Dim.21
+     , 
+     test="F"
+     
+     
+     )
+```
+
+```{r}
+add1(update(lm.null,~.+Dim.1 +  Dim.2 +    Dim.3 +   Dim.4 +    Dim.5 +  Dim.6 + Dim.7 +  Dim.8 +  Dim.11
+            ),
+     scope=~
+       Dim.1+
+       Dim.2+
+       Dim.3+
+       Dim.4+
+       Dim.5+
+       Dim.6+
+       Dim.7+
+       Dim.8+
+       Dim.9+
+       Dim.10+
+       Dim.11+
+       Dim.12+
+       Dim.13+
+       Dim.14+
+       Dim.15+
+       Dim.16+
+       Dim.17+
+       Dim.18+
+       Dim.19+
+       Dim.20+
+       Dim.21
+     , 
+     test="F"
+     
+     
+     )
+```
+
+```{r}
+add1(update(lm.null,~.+Dim.1 +  Dim.2 +    Dim.3 +   Dim.4 +    Dim.5 +  Dim.6 + Dim.7 +  Dim.8 +  Dim.11 +   Dim.10
+            ),
+     scope=~
+       Dim.1+
+       Dim.2+
+       Dim.3+
+       Dim.4+
+       Dim.5+
+       Dim.6+
+       Dim.7+
+       Dim.8+
+       Dim.9+
+       Dim.10+
+       Dim.11+
+       Dim.12+
+       Dim.13+
+       Dim.14+
+       Dim.15+
+       Dim.16+
+       Dim.17+
+       Dim.18+
+       Dim.19+
+       Dim.20+
+       Dim.21
+     , 
+     test="F"
+     
+     
+     )
+```
+J'ai refait cette regression en prenant soit le plus petit RSS ou soit les dimensions dans l'ordre, le résultat est le meme.
+
+
+```{r}
+
+reg.ACP <- lm(Temperature_Jour_Suivant~Dim.1 +  Dim.2 +    Dim.3 +   Dim.4 +    Dim.5 +  Dim.6 + Dim.7 +  Dim.8 +  Dim.11 +   Dim.10,previsionACP)
+
+summary(reg.ACP)
+```
+
+```{r}
+shapiro.test(reg.ACP$residuals)
+```
+C'est le meilleur résultat obtenu.
+Il n'est pas suffisant non plus.
 
 
 ## Régression Ridge
