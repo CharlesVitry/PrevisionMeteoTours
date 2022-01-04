@@ -62,7 +62,7 @@ Nous étions à la recherche d'un **jeu de données** de minimum 300 observation
 Nous avions des jeux de données provenant de sondages, mais leurs données étaient qualitative, donc non exploitable dans notre contexte d'étude.
 
 Après recherche, le jeu de données choisis est météorologique, nous souhaitons prévoir la température du lendemain en fonction des autres variables quantitative. Ce jeu de données a été obtenu dans les open data de la ville de Tours, le fichier est trouvable à l'adresse suivante : <https://data.tours-metropole.fr/explore/dataset/observation-meteorologique-historiques-tours-synop/export/?sort=date>.
-
+<br> </br>
 # Import de la base de données
 ```{r}
 data <- 
@@ -79,7 +79,7 @@ Après lecture de la colonne Date, les données sont collectés de 2010 jusqu'à
 Nous avpns cependant une limite à notre analyse.
 Puisque l'ensemble de ces observations est tirés d'une seule station d'observation.
 ![Data_Location.png](Data_Location.png){width=50%}
-
+<br> </br>
 Nous supprimons alors les collonnes correspondant à des indications géographiques
 ```{r}
 #numero de la station météo
@@ -101,7 +101,7 @@ data$department..code. <- NULL
 data$region..name. <- NULL
 data$region..code.<- NULL
 ```
-
+<br> </br>
 Les colonnes vides ou constantes sont inutilisables
 ```{r}
 data$Niveau.baromÃ.trique  <- NULL
@@ -123,7 +123,7 @@ data$TempÃ.rature.minimale.du.sol.sur.12.heures..en.Â.C. <- NULL
 
 ```
 
-
+<br> </br>
 Retirons les variables qualitatives
 
 type de tendance barométrique et temps présent est mis quali- mi quanti, nous ne le traitons pas
@@ -142,14 +142,14 @@ data$mois_de_l_annee <- NULL
 ```
 
 
-
+<br> </br>
 Nous n'avons pas supprimé la variable date car elle nous est utile à trier chronologiquement les données.
 ```{r,echo=TRUE}
 
 data <- data[order(as.Date(data$Date)),]
 
 ```
-
+<br> </br>
 Observons les valeurs manquantes des variables restantes
 Existe t'il une fonction pour tester toutes les variables ?
 ```{r,results='hide'}
@@ -303,7 +303,7 @@ Plus de 10 000:
 plus de 5000:
 * $NÃ.bulositÃ...des.nuages.de.l..Ã.tage.infÃ.rieur
 
-
+<br> </br>
 Création d'un jeu de donnée où on supprimme que les plus de 30 000
 ```{r}
 #data2 <- data 
@@ -322,7 +322,7 @@ Test des régressions sur cet ensemble : plus mauvais que l'autre jeu de donnée
 
 
 
-
+<br> </br>
 Suppression des plus de 20 000
 ```{r}
 data$Type.des.nuages.de.l.Ã.tage.infÃ.rieur <- NULL
@@ -353,14 +353,14 @@ data$TempÃ.rature.maximale.sur.24.heures..Â.C. <- NULL
 
 
 ```
-
+<br> </br>
 Il s'agit d'une conversion de Kelvin en celsius, cette ligne n'a pas d'utilité
 ```{r}
 data$TempÃ.rature..Â.C. <- NULL
 #data2$TempÃ.rature..Â.C. <- NULL
 ```
 
-
+<br> </br>
 Nous sommes alors à 32 variables
 Mais combien d'observations si l'on retire les lignes avec des manquants ?
 ```{r, results='hide'}
@@ -372,7 +372,7 @@ data <- na.omit(data)
 #data2 <- na.omit(data2)
 ```
 
-
+<br> </br>
 On créé une colonne DateEnJour afin que chaque jour est son numéro
 ```{r}
 #library(dplyr)
@@ -399,7 +399,7 @@ data$DateEnJour <- data$jour + (30 *data$mois) + ( 365*data$annee)
 ```
 
 
-
+<br> </br>
 On ne garde que une observation par jour pour un jeu de prévision 
 en effet le nbre d'observation par jour est irrégulier.
 ```{r}
@@ -408,7 +408,7 @@ prevision <- do.call(rbind, by(data, list(data$DateEnJour),
                   FUN=function(x) head(x, 1)))
 
 ```
-
+<br> </br>
 On supprimme les variables créé et la date
 ```{r}
 data$Date <- NULL
@@ -428,7 +428,7 @@ prevision$jour <- NULL
 ```
 Nous avons désormais deux jeux pour réaliser une régression linéaire,
 le premier avec 5661 observations , le second avec une observation par jour dans le but de déterminer la précipation du jour à venir.
-
+<br> </br>
 Pour le jeu de prévision,
 nous creons une colonne température mais décaler de 1 jour.
 
@@ -462,9 +462,10 @@ dim(prevision)
 ```
 4999 observations de 21 variables, cela est suffisant pour la régression multiple
 
+<br> </br>
 
 ## Statistiques Descriptives
-
+<br> </br>
 Regardons ce qui caractérise cette base de données,
 tant au niveau des moyennes, de la variance...
 
@@ -473,7 +474,7 @@ summary(data)
 ```
 Nos observations sont complètes, et les variables toutes quantitatives, nous pouvons commencer la régression multiple.
 
-
+<br> </br>
 Nous n'avons pas importer en UTF-8 pour économiser de la place, donnons des labels corrects aux colonnes que nous allons utiliser.
 ```{r}
 #labels <- c(
@@ -621,7 +622,7 @@ D'autres options sont possibles : une selection de variables (forward ou backwar
 
 Continuons avec la régression du jeu de prévision.
 
-
+<br> </br>
 Résultat de la regression
 ```{r}
 summary(reg.mul)
@@ -641,7 +642,7 @@ il faut refaire le modèle avec uniquement ces variables.
 Ces valeurs ont complètement changer par la modification de l'échantillon, cette régression est totalement dépendante de son échantillon,
 le résultat des tests sur les résidus nous confirmera cela. Notre R² de 1 est complètement inutile.
 
-
+<br> </br>
 Visualisons les résidus par un histogramme
 ```{r}
 hist(reg.mul$residuals)
@@ -649,7 +650,7 @@ hist(reg.mul$residuals)
 ```
 Etonnant, les résidus semblent centrés.
 
-
+<br> </br>
 Réalisons les intervalles de confiance.
 ```{r}
 confint(reg.mul)
@@ -658,7 +659,7 @@ confint(reg.mul)
 Ainsi sur 100 échantillon de mesures météorologiques, 95 seront dans ces valeurs.
 
 
-
+<br> </br>
 
 Test d'une Regression sans la Constante
 ```{r}
@@ -666,7 +667,7 @@ reg.mulSansC <- lm(Temperature_Jour_Suivant~.-1,prevision)
 shapiro.test(reg.mulSansC$residuals)
 summary(reg.mulSansC)
 ```
-
+<br> </br>
 On refait une régression avec les variables significatives de reg.mul 
 ```{r}
 reg.mulfin <- lm(Temperature_Jour_Suivant~Variation.de.pression.en.24.heures +
@@ -677,7 +678,7 @@ reg.mulfin <- lm(Temperature_Jour_Suivant~Variation.de.pression.en.24.heures +
                    ) 
 summary(reg.mulfin)
 ```
-
+<br> </br>
 Touts les paramètres sont significatifs.
 
 ```{r}
@@ -685,9 +686,9 @@ shapiro.test(reg.mulfin$residuals)
 ```
 Mais le test sur les résidus est toujours mauvais.
 
-
+<br> </br>
 ## Matrice des corrélations des variables explicative
-
+<br> </br>
 Corrélation entre toutes les variables
 ```{r}
 #correlation
@@ -702,7 +703,7 @@ mcor
 On remarque que des groupes entre variables de memes unités se forme tel vitesse du vent avec les données sur les rafales, 
 Les corrélations les plus importantes sont celles avec Temperature du jour suivant qui est fortement correlés à 3 autres variables.
 A noter que nos variables ont des fortes corrélations, nous verrons cet impact avec la régression sur ACP.
-
+<br> </br>
 Visualisation graphique des correlations.
 ```{r}
 #
@@ -717,7 +718,7 @@ corrplot(mcor,type="upper",
          )
 ```
 
-
+<br> </br>
 Représentation des résidus, on ne pas dépasser 5%.
 ```{r}
 res.m <- rstudent(reg.mulfin)
@@ -726,12 +727,12 @@ lines(x=c(-2,0,2),y=c(2,1,2))
 ```
 
 ## Régression pas à pas
-
+<br> </br>
 Tentons d'obtenir une régression exploitable.
-
+<br> </br>
 ### Ascendant
 
-
+<br> </br>
 On commence par une régression à une seule variable
 ```{r}
 reg1 <- lm(Temperature_Jour_Suivant~1,prevision)
@@ -739,7 +740,7 @@ reg1
 ```
 En simplifiant la formule de la régression à une seule variable, il ne reste plus que y(barre), càd la moyenne.
 
-
+<br> </br>
 Voyons quelle variable pouvons nous ajouter à cette régression.
 On effectue un test de Fisher
 ```{r}
@@ -780,7 +781,7 @@ cela permet de maximiser la qualité de l'ajustement en pénalisant l'over-fitti
 
 résumé over fitting : très peu voir aucune erreurs sur notre jeu d'entrainement mais beaucoup d'erreurs avec un jeu de test.
 
-
+<br> </br>
 TempÃ.rature.minimale.du.sol.sur.12.heures  a l'AIC le plus faible, sa pvalue permet de rejetter H0
 On créé un nouveau modèle avec cette variable ajouter.
 ```{r}
@@ -816,6 +817,7 @@ add1(update(reg1,~.+TempÃ.rature.minimale.du.sol.sur.12.heures),
 
 
 ```
+<br> </br>
 On introduit les variables jusqu'à que aucune ai une augmentation du R significative lors de son introduction dans le modèle.
 ```{r}
 
@@ -1077,7 +1079,7 @@ shapiro.test(reg.mul.forward$residuals)
 Le résultat est toujours mauvais.
 
 
-
+<br> </br>
 Test d'une procédure automatique.
 ```{r}
 full <- lm(Temperature_Jour_Suivant ~.,prevision)
@@ -1088,10 +1090,10 @@ formula(forw)
 shapiro.test(lm(forw,prevision)$residuals)
 ```
 Aucun changement entre la procédure automatique et manuel.
-
+<br> </br>
 ### Descendant
 Essayons la backward selection.
-
+<br> </br>
 On commence par voir quel paramètre on retirera en premier. On utilise le test de Fisher pour cela.
 ```{r}
 lm.full <- lm(Temperature_Jour_Suivant ~.,prevision)
@@ -1275,6 +1277,7 @@ shapiro.test(update(lm.full,~.-HumiditÃ.
              -Direction.du.vent.moyen.10.mn  
              -VisibilitÃ..horizontale   )$residuals)
 ```
+<br> </br>
 Test par réalisation automatique de la backward selection.
 ```{r}
 back <- step(full, direction="backward")
@@ -1286,7 +1289,7 @@ shapiro.test(lm(back,prevision)$residuals)
 ```
 Les résultats sont différents entre la procédure manuel et automatique.
 
-
+<br> </br>
 # Comparaison des résultats des régressions
 
 A rediger.
@@ -1294,7 +1297,7 @@ A rediger.
 ## Régression sur ACP
 
 Continuons à rechercher une régression valide.
-
+<br> </br>
 On réalise une ACP normée avec 21 composantes principales.
 ```{r,fig.show='hide'}
 library(FactoMineR)
@@ -1305,13 +1308,14 @@ res.pca = PCA(prevision[,1:21],scale.unit=TRUE, ncp=21,graph=T)
 ```{r}
 plot.PCA(res.pca, axes=c(1, 2), choix="ind", habillage=5,label="var",graph.type = "ggplot")
 ```
+<br> </br>
 On sort les valeurs propre de la matrice de corrélation
 ```{r}
 res.pca$eig
 ```
 on remarque que avec les pts projeté sur la composante 1, on récupère 23% de la variance total.
 
-
+<br> </br>
 ```{r}
 previsionACP <- as.data.frame(res.pca$ind$coord)
 previsionACP$Temperature_Jour_Suivant <- prevision$Temperature_Jour_Suivant
@@ -1319,7 +1323,7 @@ previsionACP$Temperature_Jour_Suivant <- prevision$Temperature_Jour_Suivant
 
 ```
 
-
+<br> </br>
 Forward regression 
 ```{r}
 lm.full <- lm(Temperature_Jour_Suivant ~.,previsionACP)
@@ -1690,7 +1694,7 @@ shapiro.test(reg.ACP$residuals)
 C'est le meilleur résultat obtenu.
 Il n'est pas suffisant non plus.
 
-
+<br> </br>
 ## Régression Ridge
 
 Quel est la différence avec la régression que nous venons d'effectuer ?
@@ -1701,7 +1705,7 @@ Cependant, en MLR les coefficients peuvent être très sensibles à l'échantill
 
 Avec les méthodes Lasso et Ridge, en posant des contraintes, on évite ces problèmes.
 
-
+<br> </br>
 ```{r}
 library(MASS)
 
@@ -1709,22 +1713,23 @@ mod.ridge = lm.ridge(Temperature_Jour_Suivant ~.,prevision, lambda=seq(0,200,0.0
 plot(mod.ridge)
 legend("topright",legend=rownames(mod.ridge$coef),col=1:21,lty=1:3)
 ```
-
+<br> </br>
 On optimise la régression Ridge
 ```{r}
 select(mod.ridge)
 ```
+<br> </br>
 Création du modèle optimiser
 ```{r}
 mod.ridgeopt =lm.ridge(Temperature_Jour_Suivant ~. , data=prevision, lambda = 101.01)
 ```
-
+<br> </br>
 coefficient du modele
 ```{r}
 coeff = coef(mod.ridgeopt)
 coeff
 ```
-
+<br> </br>
 Test du modèle obtenu
 ```{r}
 summary(mod.ridgeopt)
@@ -1735,10 +1740,10 @@ summary(mod.ridgeopt)
 
 ```
 
-
+<br> </br>
 ## Conclusion
 
-
+<br> </br>
 Prévision d'une température
 ```{r}
 #voir fin reg multi avec toutes les variables.
