@@ -61,7 +61,7 @@ knitr::opts_chunk$set(echo = TRUE)
 Nous étions à la recherche d'un **jeu de données** de minimum 300 observations et 15 variables quantitatives dont une à expliquer,
 Nous avions des jeux de données provenant de sondages, mais leurs données étaient qualitative, donc non exploitable dans notre contexte d'étude.
 
-Après recherche, le jeu de données choisis est météorologique, nous allons expliquer la température en fonction des autres variables quantitative. Ce jeu de données a été obtenu dans les open data de la ville de Tours, le fichier est trouvable à l'adresse suivante : <https://data.tours-metropole.fr/explore/dataset/observation-meteorologique-historiques-tours-synop/export/?sort=date>.
+Après recherche, le jeu de données choisis est météorologique, nous souhaitons prévoir la température du lendemain en fonction des autres variables quantitative. Ce jeu de données a été obtenu dans les open data de la ville de Tours, le fichier est trouvable à l'adresse suivante : <https://data.tours-metropole.fr/explore/dataset/observation-meteorologique-historiques-tours-synop/export/?sort=date>.
 
 # Import de la base de données
 ```{r}
@@ -70,7 +70,7 @@ data <-
 
 ```
 
-D'après l'hébergeur les paramètres atmosphériques sont mesurés (température, humidité, direction et force du vent, pression atmosphérique, hauteur de précipitations) ou observés (temps sensible, description des nuages, visibilité) depuis la surface terrestre.
+D'après l'hébergeur les paramètres atmosphériques sont mesurés (température, humidité, direction et force du vent, pression atmosphérique...) ou observés (description des nuages, visibilité...) depuis la surface terrestre.
 
 Après lecture de la colonne Date, les données sont collectés de 2010 jusqu'à maintenant, il en résulte plus de \textcolor{blue}{30k observations}.
 
@@ -306,19 +306,19 @@ plus de 5000:
 
 Création d'un jeu de donnée où on supprimme que les plus de 30 000
 ```{r}
-data2 <- data 
+#data2 <- data 
 
-data2$GÃ.opotentiel <- NULL
-data2$TempÃ.rature.maximale.sur.24.heures..Â.C. <- NULL
-data2$Type.nuage.4 <- NULL
-data2$PhÃ.nomÃ.ne.spÃ.cial.4 <- NULL
-data2$Type.nuage.2 <- NULL
-data2$NÃ.bulositÃ..couche.nuageuse.3 <- NULL
-data2$Type.nuage.3 <- NULL
-data2$Hauteur.de.base.3 <- NULL
-data2$Type.nuage.4 <- NULL
+#data2$GÃ.opotentiel <- NULL
+#data2$TempÃ.rature.maximale.sur.24.heures..Â.C. <- NULL
+#data2$Type.nuage.4 <- NULL
+#data2$PhÃ.nomÃ.ne.spÃ.cial.4 <- NULL
+#data2$Type.nuage.2 <- NULL
+#data2$NÃ.bulositÃ..couche.nuageuse.3 <- NULL
+#data2$Type.nuage.3 <- NULL
+#data2$Hauteur.de.base.3 <- NULL
+#data2$Type.nuage.4 <- NULL
 ```
-
+Test des régressions sur cet ensemble : plus mauvais que l'autre jeu de données.
 
 
 
@@ -357,19 +357,19 @@ data$TempÃ.rature.maximale.sur.24.heures..Â.C. <- NULL
 Il s'agit d'une conversion de Kelvin en celsius, cette ligne n'a pas d'utilité
 ```{r}
 data$TempÃ.rature..Â.C. <- NULL
-data2$TempÃ.rature..Â.C. <- NULL
+#data2$TempÃ.rature..Â.C. <- NULL
 ```
 
 
 Nous sommes alors à 32 variables
 Mais combien d'observations si l'on retire les lignes avec des manquants ?
-```{r, results='hide',echo=FALSE}
+```{r, results='hide'}
 which(is.na(data))
 data <- na.omit(data)
 
 
-which(is.na(data2))
-data2 <- na.omit(data2)
+#which(is.na(data2))
+#data2 <- na.omit(data2)
 ```
 
 
@@ -427,7 +427,7 @@ prevision$jour <- NULL
 
 ```
 Nous avons désormais deux jeux pour réaliser une régression linéaire,
-le premier avec 5661 observations , le second avec une observation par jour dans le but de déterminer la Température du jour à venir.
+le premier avec 5661 observations , le second avec une observation par jour dans le but de déterminer la précipation du jour à venir.
 
 Pour le jeu de prévision,
 nous creons une colonne température mais décaler de 1 jour.
@@ -445,7 +445,7 @@ puis on supprimait la première observation.
 
 library(Hmisc)
 #prevision$Precipitation_Jour_Suivant <- Lag(prevision$PrÃ.cipitations.dans.les.24.derniÃ.res.heures, shift = -1)
-prevision$Precipitation_Jour_Suivant <- Lag(prevision$TempÃ.rature, shift = -1)
+prevision$Temperature_Jour_Suivant <- Lag(prevision$TempÃ.rature, shift = -1)
 #on supprimme la derniere observation
 library(dplyr)
 prevision = slice(prevision, 1:(n() -1))
@@ -547,9 +547,6 @@ shapiro.test(reg.mul$residuals)
 reg.mul <- lm(Vitesse.du.vent.moyen.10.mn~.,data)
 shapiro.test(reg.mul$residuals)
 
-reg.mul <- lm(TempÃ.rature~.,data)
-shapiro.test(reg.mul$residuals)
-
 reg.mul <- lm(Point.de.rosÃ.e~.,data)
 shapiro.test(reg.mul$residuals)
 
@@ -598,6 +595,9 @@ shapiro.test(reg.mul$residuals)
 reg.mul <- lm(Hauteur.de.base.2~.,data)
 shapiro.test(reg.mul$residuals)
 
+reg.mul <- lm(TempÃ.rature~.,data)
+shapiro.test(reg.mul$residuals)
+
 
 ```
 Toutes les régressions testés affichent des résidus non gaussiens. Ces régressions sont inexploitable au delà de notre échantillon.
@@ -605,126 +605,799 @@ Toutes les régressions testés affichent des résidus non gaussiens. Ces régre
 
 Testons avec le jeu de prévision.
 ```{r}
-
-reg.mul <- lm(TempÃ.rature~.,prevision)
+reg.mul <- lm(Temperature_Jour_Suivant ~.,prevision)
 shapiro.test(reg.mul$residuals)
 
 ```
-Avec des résidus non gaussiens , un R² de 1 est inutile
-![Rcarre.png](Rcarre.png)
+De même les résidus ne sont pas gaussiens.
+La p-value est inferieur à 5% donc on rejette H0, les Ei ne suivent pas des lois normales (résidus non gaussiens)
+!! les tests de Fisher et Student ne sont pas valables. !!
+
+Quels options sont possibles lorsque notre régression est mauvaise ?
+
+Premièrement, on vérifie par un test de Fisher que le modèle est valide.
+Deuxièmement,on peut ajouter la constante au modèle de regression ou d'autres variables explicatives afin de réduire les résidus.
+D'autres options sont possibles : une selection de variables (forward ou backward selection), imposer des contraintes au vecteur de régression (cf Lasso ou Ridge), réaliser une régression sur les composantes principales (ACP : variables non correlés)
+
+Continuons avec la régression du jeu de prévision.
 
 
+Résultat de la regression
+```{r}
+summary(reg.mul)
+#summary(reg.mul.prevision)
+```
 
 
+Les résidus estimés ont une moyenne de 0. 
 
-
-
-
-
-
-
-
-
-
-
-
-
-Les résidus estimés ont une moyenne de 0.
-
-Avant que l'on retire des observations pour atteindre moins de 5000, on observe :
-"""
+L'observation suivante dépend d'une execution à l'autre du code (selon l'échantillonage) : 
 Il nous est indiqué que 3 variables sont significatives, il y en a peu car les variables doivent être très corréllés
 
-Attention, Nous ne pouvons écrire que Temperature du jour suivant = 7.464e-14 + Variation_Pression_3h * -1.321e-18 + Direction_vent *  4.089e-18  ,
+Attention, Nous ne pouvons écrire que Temperature du jour suivant = 40 + TempÃ.rature.minimale.du.sol.sur.12.heures  * 3.3 + Variation.de.pression.en.24.heures  * 5  ,
 il faut refaire le modèle avec uniquement ces variables. 
-"""
+
+
 Ces valeurs ont complètement changer par la modification de l'échantillon, cette régression est totalement dépendante de son échantillon,
 le résultat des tests sur les résidus nous confirmera cela. Notre R² de 1 est complètement inutile.
 
 
-summary(reg.mul)
+Visualisons les résidus par un histogramme
+```{r}
+hist(reg.mul$residuals)
+#hist(reg.mul.prevision$residuals)
+```
+Etonnant, les résidus semblent centrés.
 
 
-Réalisons les intervalles de confiance et l'histogramme
+Réalisons les intervalles de confiance.
 ```{r}
 confint(reg.mul)
-
+#confint(reg.mul.prevision)
 ```
 Ainsi sur 100 échantillon de mesures météorologiques, 95 seront dans ces valeurs.
 
 
-histogramme des résidus
+
+
+Test d'une Regression sans la Constante
 ```{r}
-hist(reg.mul$residuals)
+reg.mulSansC <- lm(Temperature_Jour_Suivant~.-1,prevision)
+shapiro.test(reg.mulSansC$residuals)
+summary(reg.mulSansC)
 ```
 
-
-tests sur les résidus gaussiens
-```{r,echo=TRUE}
-#reg.mul$residuals
-
-shapiro.test(reg.mul$residuals)
-
-```
-La p-value est inferieur à 5% donc on rejette H0, les Ei ne suivent pas des lois normales (résidus non gaussiens)
-les tests de Fisher et Student ne sont pas valables.
-
-Regression sans la Constante
+On refait une régression avec les variables significatives de reg.mul 
 ```{r}
-#reg.mulSansC <- lm(Temperature~.-1,data)
-#summary(reg.mulSansC)
+reg.mulfin <- lm(Temperature_Jour_Suivant~Variation.de.pression.en.24.heures +
+                   Hauteur.de.base.2 +
+                   TempÃ.rature.minimale.du.sol.sur.12.heures ,
+                 prevision
+                   
+                   ) 
+summary(reg.mulfin)
 ```
 
+Touts les paramètres sont significatifs.
 
-On refait une régression avec les variables significatives
 ```{r}
-#reg.mulfin <- lm(,data)
-#summary(reg.mulfin)
+shapiro.test(reg.mulfin$residuals)
 ```
-
-
-
+Mais le test sur les résidus est toujours mauvais.
 
 
 ## Matrice des corrélations des variables explicative
 
-commentaire
+Corrélation entre toutes les variables
 ```{r}
+#correlation
+mcor <- cor(prevision)
+
+#Les Correlations sans visualisation graphique. 
+mcor
+
+
 
 ```
+On remarque que des groupes entre variables de memes unités se forme tel vitesse du vent avec les données sur les rafales, 
+Les corrélations les plus importantes sont celles avec Temperature du jour suivant qui est fortement correlés à 3 autres variables.
+A noter que nos variables ont des fortes corrélations, nous verrons cet impact avec la régression sur ACP.
 
-visualisation
+Visualisation graphique des correlations.
 ```{r}
+#
+library(corrplot)
+corrplot(mcor,type="upper",
+         order="hclust",
+         tl.col="black",
+         tl.srt=45,
+         col = NULL,
+          tl.pos='n'
+         
+         )
+```
 
+
+Représentation des résidus, on ne pas dépasser 5%.
+```{r}
+res.m <- rstudent(reg.mulfin)
+plot(res.m, pch=20,cex=1, ylab = "Residus", main="",ylim=c(-4,+4))
+lines(x=c(-2,0,2),y=c(2,1,2))
 ```
 
 ## Régression pas à pas
 
-Ascendant
+Tentons d'obtenir une régression exploitable.
+
+### Ascendant
+
+
+On commence par une régression à une seule variable
+```{r}
+reg1 <- lm(Temperature_Jour_Suivant~1,prevision)
+reg1
+```
+En simplifiant la formule de la régression à une seule variable, il ne reste plus que y(barre), càd la moyenne.
+
+
+Voyons quelle variable pouvons nous ajouter à cette régression.
+On effectue un test de Fisher
+```{r}
+add1(reg1, scope =~Pression.au.niveau.mer +
+       Variation.de.pression.en.3.heures +
+       Direction.du.vent.moyen.10.mn  +
+       Vitesse.du.vent.moyen.10.mn  +
+       Point.de.rosÃ.e  +
+       HumiditÃ.     +
+       VisibilitÃ..horizontale +
+       NebulositÃ..totale  +
+       Hauteur.de.la.base.des.nuages.de.l.Ã.tage.infÃ.rieur+
+       Pression.station +
+       Variation.de.pression.en.24.heures  +
+       TempÃ.rature.minimale.du.sol.sur.12.heures +
+       Rafale.sur.les.10.derniÃ.res.minutes   +
+       Rafales.sur.une.pÃ.riode+
+       PrÃ.cipitations.dans.la.derniÃ.re.heure  +
+       PrÃ.cipitations.dans.les.3.derniÃ.res.heures+
+       PrÃ.cipitations.dans.les.6.derniÃ.res.heures  +
+       PrÃ.cipitations.dans.les.12.derniÃ.res.heures  +
+       PrÃ.cipitations.dans.les.24.derniÃ.res.heures+
+       Hauteur.de.base.2 +
+       TempÃ.rature 
+
+       
+       , test="F" )
+```
+On remarque avec les différentes Pvalues que de nombreuses variables sont éligibles à la rentrée dans le modèle.
+La F value nous indique si l'augmentation du R² est significative.
+Par exemple, pour la variable "Pression.au.niveau.mer", l'hypothèse H0 est "Bêta^Pression.au.niveau.mer = 0"
+Si cela est significatif on peut introduire la variable dans le modèle.
+
+On remarque que plusieurs variables affiche une pvalue de 2.2e-16 , càd le nbre le plus bas affichable par R.
+Je départage ces variables en prenant en compte le critère AIC.
+Je prends le critère AIC le plus bas, ce n'est pas préciser mais il semble qu'il s'agisse du coefficient corrigé (lorsque n/k > 40)
+cela permet de maximiser la qualité de l'ajustement en pénalisant l'over-fitting.
+
+résumé over fitting : très peu voir aucune erreurs sur notre jeu d'entrainement mais beaucoup d'erreurs avec un jeu de test.
+
+
+TempÃ.rature.minimale.du.sol.sur.12.heures  a l'AIC le plus faible, sa pvalue permet de rejetter H0
+On créé un nouveau modèle avec cette variable ajouter.
+```{r}
+#introduction de la variable dans le modèle pour une régression à 2 variables
+
+add1(update(reg1,~.+TempÃ.rature.minimale.du.sol.sur.12.heures),
+     scope =~Pression.au.niveau.mer +
+       Variation.de.pression.en.3.heures +
+       Direction.du.vent.moyen.10.mn  +
+       Vitesse.du.vent.moyen.10.mn  +
+       Point.de.rosÃ.e  +
+       HumiditÃ.     +
+       VisibilitÃ..horizontale +
+       NebulositÃ..totale  +
+       Hauteur.de.la.base.des.nuages.de.l.Ã.tage.infÃ.rieur+
+       Pression.station +
+       Variation.de.pression.en.24.heures  +
+       TempÃ.rature.minimale.du.sol.sur.12.heures +
+       Rafale.sur.les.10.derniÃ.res.minutes   +
+       Rafales.sur.une.pÃ.riode+
+       PrÃ.cipitations.dans.la.derniÃ.re.heure  +
+       PrÃ.cipitations.dans.les.3.derniÃ.res.heures+
+       PrÃ.cipitations.dans.les.6.derniÃ.res.heures  +
+       PrÃ.cipitations.dans.les.12.derniÃ.res.heures  +
+       PrÃ.cipitations.dans.les.24.derniÃ.res.heures+
+       Hauteur.de.base.2 +
+       TempÃ.rature 
+
+       
+       , test="F" )
+     
+
+
+
+```
+On introduit les variables jusqu'à que aucune ai une augmentation du R significative lors de son introduction dans le modèle.
+```{r}
+
+add1(update(reg1,~.+TempÃ.rature.minimale.du.sol.sur.12.heures+
+            TempÃ.rature  ),
+     scope =~Pression.au.niveau.mer +
+       Variation.de.pression.en.3.heures +
+       Direction.du.vent.moyen.10.mn  +
+       Vitesse.du.vent.moyen.10.mn  +
+       Point.de.rosÃ.e  +
+       HumiditÃ.     +
+       VisibilitÃ..horizontale +
+       NebulositÃ..totale  +
+       Hauteur.de.la.base.des.nuages.de.l.Ã.tage.infÃ.rieur+
+       Pression.station +
+       Variation.de.pression.en.24.heures  +
+       TempÃ.rature.minimale.du.sol.sur.12.heures +
+       Rafale.sur.les.10.derniÃ.res.minutes   +
+       Rafales.sur.une.pÃ.riode+
+       PrÃ.cipitations.dans.la.derniÃ.re.heure  +
+       PrÃ.cipitations.dans.les.3.derniÃ.res.heures+
+       PrÃ.cipitations.dans.les.6.derniÃ.res.heures  +
+       PrÃ.cipitations.dans.les.12.derniÃ.res.heures  +
+       PrÃ.cipitations.dans.les.24.derniÃ.res.heures+
+       Hauteur.de.base.2 +
+       TempÃ.rature 
+
+       
+       , test="F" )
+```
+
+```{r}
+add1(update(reg1,~.+TempÃ.rature.minimale.du.sol.sur.12.heures+
+            TempÃ.rature +
+              Rafales.sur.une.pÃ.riode   ),
+     scope =~Pression.au.niveau.mer +
+       Variation.de.pression.en.3.heures +
+       Direction.du.vent.moyen.10.mn  +
+       Vitesse.du.vent.moyen.10.mn  +
+       Point.de.rosÃ.e  +
+       HumiditÃ.     +
+       VisibilitÃ..horizontale +
+       NebulositÃ..totale  +
+       Hauteur.de.la.base.des.nuages.de.l.Ã.tage.infÃ.rieur+
+       Pression.station +
+       Variation.de.pression.en.24.heures  +
+       TempÃ.rature.minimale.du.sol.sur.12.heures +
+       Rafale.sur.les.10.derniÃ.res.minutes   +
+       Rafales.sur.une.pÃ.riode+
+       PrÃ.cipitations.dans.la.derniÃ.re.heure  +
+       PrÃ.cipitations.dans.les.3.derniÃ.res.heures+
+       PrÃ.cipitations.dans.les.6.derniÃ.res.heures  +
+       PrÃ.cipitations.dans.les.12.derniÃ.res.heures  +
+       PrÃ.cipitations.dans.les.24.derniÃ.res.heures+
+       Hauteur.de.base.2 +
+       TempÃ.rature 
+
+       
+       , test="F" )
+```
+
+```{r}
+add1(update(reg1,~.+TempÃ.rature.minimale.du.sol.sur.12.heures+
+            TempÃ.rature +
+              Rafales.sur.une.pÃ.riode +
+              Hauteur.de.base.2  ),
+     scope =~Pression.au.niveau.mer +
+       Variation.de.pression.en.3.heures +
+       Direction.du.vent.moyen.10.mn  +
+       Vitesse.du.vent.moyen.10.mn  +
+       Point.de.rosÃ.e  +
+       HumiditÃ.     +
+       VisibilitÃ..horizontale +
+       NebulositÃ..totale  +
+       Hauteur.de.la.base.des.nuages.de.l.Ã.tage.infÃ.rieur+
+       Pression.station +
+       Variation.de.pression.en.24.heures  +
+       TempÃ.rature.minimale.du.sol.sur.12.heures +
+       Rafale.sur.les.10.derniÃ.res.minutes   +
+       Rafales.sur.une.pÃ.riode+
+       PrÃ.cipitations.dans.la.derniÃ.re.heure  +
+       PrÃ.cipitations.dans.les.3.derniÃ.res.heures+
+       PrÃ.cipitations.dans.les.6.derniÃ.res.heures  +
+       PrÃ.cipitations.dans.les.12.derniÃ.res.heures  +
+       PrÃ.cipitations.dans.les.24.derniÃ.res.heures+
+       Hauteur.de.base.2 +
+       TempÃ.rature 
+
+       
+       , test="F" )
+```
+
+```{r}
+add1(update(reg1,~.+TempÃ.rature.minimale.du.sol.sur.12.heures+
+            TempÃ.rature +
+              Rafales.sur.une.pÃ.riode +
+              Hauteur.de.base.2 +
+              Pression.station                                      
+              ),
+     scope =~Pression.au.niveau.mer +
+       Variation.de.pression.en.3.heures +
+       Direction.du.vent.moyen.10.mn  +
+       Vitesse.du.vent.moyen.10.mn  +
+       Point.de.rosÃ.e  +
+       HumiditÃ.     +
+       VisibilitÃ..horizontale +
+       NebulositÃ..totale  +
+       Hauteur.de.la.base.des.nuages.de.l.Ã.tage.infÃ.rieur+
+       Pression.station +
+       Variation.de.pression.en.24.heures  +
+       TempÃ.rature.minimale.du.sol.sur.12.heures +
+       Rafale.sur.les.10.derniÃ.res.minutes   +
+       Rafales.sur.une.pÃ.riode+
+       PrÃ.cipitations.dans.la.derniÃ.re.heure  +
+       PrÃ.cipitations.dans.les.3.derniÃ.res.heures+
+       PrÃ.cipitations.dans.les.6.derniÃ.res.heures  +
+       PrÃ.cipitations.dans.les.12.derniÃ.res.heures  +
+       PrÃ.cipitations.dans.les.24.derniÃ.res.heures+
+       Hauteur.de.base.2 +
+       TempÃ.rature 
+
+       
+       , test="F" )
+```
+
+```{r}
+add1(update(reg1,~.+TempÃ.rature.minimale.du.sol.sur.12.heures+
+            TempÃ.rature +
+              Rafales.sur.une.pÃ.riode +
+              Hauteur.de.base.2 +
+              Pression.station   +
+              Point.de.rosÃ.e 
+              ),
+     scope =~Pression.au.niveau.mer +
+       Variation.de.pression.en.3.heures +
+       Direction.du.vent.moyen.10.mn  +
+       Vitesse.du.vent.moyen.10.mn  +
+       Point.de.rosÃ.e  +
+       HumiditÃ.     +
+       VisibilitÃ..horizontale +
+       NebulositÃ..totale  +
+       Hauteur.de.la.base.des.nuages.de.l.Ã.tage.infÃ.rieur+
+       Pression.station +
+       Variation.de.pression.en.24.heures  +
+       TempÃ.rature.minimale.du.sol.sur.12.heures +
+       Rafale.sur.les.10.derniÃ.res.minutes   +
+       Rafales.sur.une.pÃ.riode+
+       PrÃ.cipitations.dans.la.derniÃ.re.heure  +
+       PrÃ.cipitations.dans.les.3.derniÃ.res.heures+
+       PrÃ.cipitations.dans.les.6.derniÃ.res.heures  +
+       PrÃ.cipitations.dans.les.12.derniÃ.res.heures  +
+       PrÃ.cipitations.dans.les.24.derniÃ.res.heures+
+       Hauteur.de.base.2 +
+       TempÃ.rature 
+
+       
+       , test="F" )
+```
+
+```{r}
+add1(update(reg1,~.+TempÃ.rature.minimale.du.sol.sur.12.heures+
+            TempÃ.rature +
+              Rafales.sur.une.pÃ.riode +
+              Hauteur.de.base.2 +
+              Pression.station   +
+              Point.de.rosÃ.e +
+              Variation.de.pression.en.24.heures
+              ),
+     scope =~Pression.au.niveau.mer +
+       Variation.de.pression.en.3.heures +
+       Direction.du.vent.moyen.10.mn  +
+       Vitesse.du.vent.moyen.10.mn  +
+       Point.de.rosÃ.e  +
+       HumiditÃ.     +
+       VisibilitÃ..horizontale +
+       NebulositÃ..totale  +
+       Hauteur.de.la.base.des.nuages.de.l.Ã.tage.infÃ.rieur+
+       Pression.station +
+       Variation.de.pression.en.24.heures  +
+       TempÃ.rature.minimale.du.sol.sur.12.heures +
+       Rafale.sur.les.10.derniÃ.res.minutes   +
+       Rafales.sur.une.pÃ.riode+
+       PrÃ.cipitations.dans.la.derniÃ.re.heure  +
+       PrÃ.cipitations.dans.les.3.derniÃ.res.heures+
+       PrÃ.cipitations.dans.les.6.derniÃ.res.heures  +
+       PrÃ.cipitations.dans.les.12.derniÃ.res.heures  +
+       PrÃ.cipitations.dans.les.24.derniÃ.res.heures+
+       Hauteur.de.base.2 +
+       TempÃ.rature 
+
+       
+       , test="F" )
+```
+
+
+
+
+```{r}
+add1(update(reg1,~.+TempÃ.rature.minimale.du.sol.sur.12.heures+
+            TempÃ.rature +
+              Rafales.sur.une.pÃ.riode +
+              Hauteur.de.base.2 +
+              Pression.station   +
+              Point.de.rosÃ.e +
+              Variation.de.pression.en.24.heures+
+              Variation.de.pression.en.3.heures 
+              ),
+     scope =~Pression.au.niveau.mer +
+       Variation.de.pression.en.3.heures +
+       Direction.du.vent.moyen.10.mn  +
+       Vitesse.du.vent.moyen.10.mn  +
+       Point.de.rosÃ.e  +
+       HumiditÃ.     +
+       VisibilitÃ..horizontale +
+       NebulositÃ..totale  +
+       Hauteur.de.la.base.des.nuages.de.l.Ã.tage.infÃ.rieur+
+       Pression.station +
+       Variation.de.pression.en.24.heures  +
+       TempÃ.rature.minimale.du.sol.sur.12.heures +
+       Rafale.sur.les.10.derniÃ.res.minutes   +
+       Rafales.sur.une.pÃ.riode+
+       PrÃ.cipitations.dans.la.derniÃ.re.heure  +
+       PrÃ.cipitations.dans.les.3.derniÃ.res.heures+
+       PrÃ.cipitations.dans.les.6.derniÃ.res.heures  +
+       PrÃ.cipitations.dans.les.12.derniÃ.res.heures  +
+       PrÃ.cipitations.dans.les.24.derniÃ.res.heures+
+       Hauteur.de.base.2 +
+       TempÃ.rature 
+
+       
+       , test="F" )
+```
+Aucune variable à introduire, on arrete notre forward selection ici.
+
+Modele de la forward regression
+```{r}
+reg.mul.forward <- lm(Temperature_Jour_Suivant~
+                        
+                       TempÃ.rature.minimale.du.sol.sur.12.heures+
+            TempÃ.rature +
+              Rafales.sur.une.pÃ.riode +
+              Hauteur.de.base.2 +
+              Pression.station   +
+              Point.de.rosÃ.e +
+              Variation.de.pression.en.24.heures+
+              Variation.de.pression.en.3.heures 
+                   
+                   ,
+                 prevision
+                   
+                   ) 
+
+summary(reg.mul.forward)
+```
+On test les résidus
+```{r}
+shapiro.test(reg.mul.forward$residuals)
+```
+Le résultat est toujours mauvais.
+
+
+
+Test d'une procédure automatique.
+```{r}
+full <- lm(Temperature_Jour_Suivant ~.,prevision)
+null <-   lm(Temperature_Jour_Suivant ~1,prevision)
+
+forw <- step(null,scope=list(lower=null, upper = full),direction = "forward",trace=0)
+formula(forw)
+shapiro.test(lm(forw,prevision)$residuals)
+```
+Aucun changement entre la procédure automatique et manuel.
+
+### Descendant
+Essayons la backward selection.
+
+On commence par voir quel paramètre on retirera en premier. On utilise le test de Fisher pour cela.
+```{r}
+lm.full <- lm(Temperature_Jour_Suivant ~.,prevision)
+drop1(lm.full,test="F")
+```
+à chaque itération, on retire la p-value de F la plus forte
+```{r}
+drop1(update(lm.full,~.-HumiditÃ. 
+             ), test="F")
+```
+
+```{r}
+drop1(update(lm.full,~.-HumiditÃ. 
+             -PrÃ.cipitations.dans.les.3.derniÃ.res.heures
+             ), test="F")
+```
+
+```{r}
+drop1(update(lm.full,~.-HumiditÃ. 
+             -PrÃ.cipitations.dans.les.3.derniÃ.res.heures
+             -PrÃ.cipitations.dans.les.12.derniÃ.res.heures 
+             ), test="F")
+```
+
+```{r}
+drop1(update(lm.full,~.-HumiditÃ. 
+             -PrÃ.cipitations.dans.les.3.derniÃ.res.heures
+             -PrÃ.cipitations.dans.les.12.derniÃ.res.heures 
+             -PrÃ.cipitations.dans.les.6.derniÃ.res.heures  
+             ), test="F")
+```
+
+```{r}
+drop1(update(lm.full,~.-HumiditÃ. 
+             -PrÃ.cipitations.dans.les.3.derniÃ.res.heures
+             -PrÃ.cipitations.dans.les.12.derniÃ.res.heures 
+             -PrÃ.cipitations.dans.les.6.derniÃ.res.heures  
+             -Rafale.sur.les.10.derniÃ.res.minutes 
+             ), test="F")
+```
+
+```{r}
+drop1(update(lm.full,~.-HumiditÃ. 
+             -PrÃ.cipitations.dans.les.3.derniÃ.res.heures
+             -PrÃ.cipitations.dans.les.12.derniÃ.res.heures 
+             -PrÃ.cipitations.dans.les.6.derniÃ.res.heures  
+             -Rafale.sur.les.10.derniÃ.res.minutes 
+             -PrÃ.cipitations.dans.les.24.derniÃ.res.heures
+             ), test="F")
+```
+
+```{r}
+drop1(update(lm.full,~.-HumiditÃ. 
+             -PrÃ.cipitations.dans.les.3.derniÃ.res.heures
+             -PrÃ.cipitations.dans.les.12.derniÃ.res.heures 
+             -PrÃ.cipitations.dans.les.6.derniÃ.res.heures  
+             -Rafale.sur.les.10.derniÃ.res.minutes 
+             -PrÃ.cipitations.dans.les.24.derniÃ.res.heures
+             -Hauteur.de.la.base.des.nuages.de.l.Ã.tage.infÃ.rieur
+             ), test="F")
+```
+
+```{r}
+
+drop1(update(lm.full,~.-HumiditÃ. 
+             -PrÃ.cipitations.dans.les.3.derniÃ.res.heures
+             -PrÃ.cipitations.dans.les.12.derniÃ.res.heures 
+             -PrÃ.cipitations.dans.les.6.derniÃ.res.heures  
+             -Rafale.sur.les.10.derniÃ.res.minutes 
+             -PrÃ.cipitations.dans.les.24.derniÃ.res.heures
+             -Hauteur.de.la.base.des.nuages.de.l.Ã.tage.infÃ.rieur
+             -PrÃ.cipitations.dans.la.derniÃ.re.heure 
+             ), test="F")
+
+```
+
+```{r}
+drop1(update(lm.full,~.-HumiditÃ. 
+             -PrÃ.cipitations.dans.les.3.derniÃ.res.heures
+             -PrÃ.cipitations.dans.les.12.derniÃ.res.heures 
+             -PrÃ.cipitations.dans.les.6.derniÃ.res.heures  
+             -Rafale.sur.les.10.derniÃ.res.minutes 
+             -PrÃ.cipitations.dans.les.24.derniÃ.res.heures
+             -Hauteur.de.la.base.des.nuages.de.l.Ã.tage.infÃ.rieur
+             -PrÃ.cipitations.dans.la.derniÃ.re.heure 
+             -Vitesse.du.vent.moyen.10.mn                 
+             ), test="F")
+```
+
+```{r}
+drop1(update(lm.full,~.-HumiditÃ. 
+             -PrÃ.cipitations.dans.les.3.derniÃ.res.heures
+             -PrÃ.cipitations.dans.les.12.derniÃ.res.heures 
+             -PrÃ.cipitations.dans.les.6.derniÃ.res.heures  
+             -Rafale.sur.les.10.derniÃ.res.minutes 
+             -PrÃ.cipitations.dans.les.24.derniÃ.res.heures
+             -Hauteur.de.la.base.des.nuages.de.l.Ã.tage.infÃ.rieur
+             -PrÃ.cipitations.dans.la.derniÃ.re.heure 
+             -Vitesse.du.vent.moyen.10.mn 
+             -NebulositÃ..totale 
+             ), test="F")
+```
+
+```{r}
+drop1(update(lm.full,~.-HumiditÃ. 
+             -PrÃ.cipitations.dans.les.3.derniÃ.res.heures
+             -PrÃ.cipitations.dans.les.12.derniÃ.res.heures 
+             -PrÃ.cipitations.dans.les.6.derniÃ.res.heures  
+             -Rafale.sur.les.10.derniÃ.res.minutes 
+             -PrÃ.cipitations.dans.les.24.derniÃ.res.heures
+             -Hauteur.de.la.base.des.nuages.de.l.Ã.tage.infÃ.rieur
+             -PrÃ.cipitations.dans.la.derniÃ.re.heure 
+             -Vitesse.du.vent.moyen.10.mn 
+             -NebulositÃ..totale 
+             -Pression.au.niveau.mer  
+             ), test="F")
+```
+
+```{r}
+drop1(update(lm.full,~.-HumiditÃ. 
+             -PrÃ.cipitations.dans.les.3.derniÃ.res.heures
+             -PrÃ.cipitations.dans.les.12.derniÃ.res.heures 
+             -PrÃ.cipitations.dans.les.6.derniÃ.res.heures  
+             -Rafale.sur.les.10.derniÃ.res.minutes 
+             -PrÃ.cipitations.dans.les.24.derniÃ.res.heures
+             -Hauteur.de.la.base.des.nuages.de.l.Ã.tage.infÃ.rieur
+             -PrÃ.cipitations.dans.la.derniÃ.re.heure 
+             -Vitesse.du.vent.moyen.10.mn 
+             -NebulositÃ..totale 
+             -Pression.au.niveau.mer  
+             -Direction.du.vent.moyen.10.mn   
+             ), test="F")
+```
+
+```{r}
+drop1(update(lm.full,~.-HumiditÃ. 
+             -PrÃ.cipitations.dans.les.3.derniÃ.res.heures
+             -PrÃ.cipitations.dans.les.12.derniÃ.res.heures 
+             -PrÃ.cipitations.dans.les.6.derniÃ.res.heures  
+             -Rafale.sur.les.10.derniÃ.res.minutes 
+             -PrÃ.cipitations.dans.les.24.derniÃ.res.heures
+             -Hauteur.de.la.base.des.nuages.de.l.Ã.tage.infÃ.rieur
+             -PrÃ.cipitations.dans.la.derniÃ.re.heure 
+             -Vitesse.du.vent.moyen.10.mn 
+             -NebulositÃ..totale 
+             -Pression.au.niveau.mer  
+             -Direction.du.vent.moyen.10.mn  
+             -VisibilitÃ..horizontale   
+             
+             ), test="F")
+```
+
+Toutes les variables sont significatives, voici le modele backward selection complet.
+```{r}
+summary(update(lm.full,~.-HumiditÃ. 
+             -PrÃ.cipitations.dans.les.3.derniÃ.res.heures
+             -PrÃ.cipitations.dans.les.12.derniÃ.res.heures 
+             -PrÃ.cipitations.dans.les.6.derniÃ.res.heures  
+             -Rafale.sur.les.10.derniÃ.res.minutes 
+             -PrÃ.cipitations.dans.les.24.derniÃ.res.heures
+             -Hauteur.de.la.base.des.nuages.de.l.Ã.tage.infÃ.rieur
+             -PrÃ.cipitations.dans.la.derniÃ.re.heure 
+             -Vitesse.du.vent.moyen.10.mn 
+             -NebulositÃ..totale 
+             -Pression.au.niveau.mer  
+             -Direction.du.vent.moyen.10.mn  
+             -VisibilitÃ..horizontale   ))
+
+
+shapiro.test(update(lm.full,~.-HumiditÃ. 
+             -PrÃ.cipitations.dans.les.3.derniÃ.res.heures
+             -PrÃ.cipitations.dans.les.12.derniÃ.res.heures 
+             -PrÃ.cipitations.dans.les.6.derniÃ.res.heures  
+             -Rafale.sur.les.10.derniÃ.res.minutes 
+             -PrÃ.cipitations.dans.les.24.derniÃ.res.heures
+             -Hauteur.de.la.base.des.nuages.de.l.Ã.tage.infÃ.rieur
+             -PrÃ.cipitations.dans.la.derniÃ.re.heure 
+             -Vitesse.du.vent.moyen.10.mn 
+             -NebulositÃ..totale 
+             -Pression.au.niveau.mer  
+             -Direction.du.vent.moyen.10.mn  
+             -VisibilitÃ..horizontale   )$residuals)
+```
+Test par réalisation automatique de la backward selection.
+```{r}
+back <- step(full, direction="backward")
+```
+
+```{r}
+formula(back)
+shapiro.test(lm(back,prevision)$residuals)
+```
+Les résultats sont différents entre la procédure manuel et automatique.
+
+
+# Comparaison des résultats des régressions
+
+A rediger.
+
+## Régression sur ACP
+
+Continuons à rechercher une régression valide.
+
+On réalise une ACP normée avec 21 composantes principales.
+```{r,fig.show='hide'}
+library(FactoMineR)
+res.pca = PCA(prevision[,1:21],scale.unit=TRUE, ncp=21,graph=T)
+
+```
+
+```{r}
+plot.PCA(res.pca, axes=c(1, 2), choix="ind", habillage=5,label="var",graph.type = "ggplot")
+```
+On sort les valeurs propre de la matrice de corrélation
+```{r}
+res.pca$eig
+```
+on remarque que avec les pts projeté sur la composante 1, on récupère 23% de la variance total.
+
+
+```{r}
+novariables <- res.pca$ind$coord
+#novariables$Temperature_Jour_Suivant <- prevision$Temperature_Jour_Suivant
+
+#novariables
+```
+
+
+Forward regression 
+```{r}
+#lm.full <- lm(Temperature_Jour_Suivant ~.,novariables)
+```
+
 ```{r}
 
 ```
 
-Descendant
 ```{r}
 
 ```
 
-Comparaison des résultats des régressions
+```{r}
 
-## ACP
+```
 
 ```{r}
 
 ```
+
+```{r}
+
+```
+
 
 ## Régression Ridge
 
+Quel est la différence avec la régression que nous venons d'effectuer ?
+
+la MLR estime les paramètres  sans biais. Tandis que Lasso applique une contrainte linéaire et Ridge une contrainte non linéaire à ces paramètres à estimer.
+
+Cependant, en MLR les coefficients peuvent être très sensibles à l'échantillonnage, et des coefficients censés être positifs pour avoir un sens (ex: une surface) sont négatifs.
+
+Avec les méthodes Lasso et Ridge, en posant des contraintes, on évite ces problèmes.
+
+
+```{r}
+library(MASS)
+
+mod.ridge = lm.ridge(Temperature_Jour_Suivant ~.,prevision, lambda=seq(0,200,0.01))
+plot(mod.ridge)
+legend("topright",legend=rownames(mod.ridge$coef),col=1:21,lty=1:3)
+```
+
+On optimise la régression Ridge
+```{r}
+select(mod.ridge)
+```
+Création du modèle optimiser
+```{r}
+mod.ridgeopt =lm.ridge(Temperature_Jour_Suivant ~. , data=prevision, lambda = 101.01)
+```
+
+coefficient du modele
+```{r}
+coeff = coef(mod.ridgeopt)
+coeff
+```
+
+Test du modèle obtenu
+```{r}
+summary(mod.ridgeopt)
+#shapiro.test(mod.ridgeopt$residuals)
+```
+
 ```{r}
 
 ```
 
+
 ## Conclusion
+
+
+Prévision d'une température
+```{r}
+#voir fin reg multi avec toutes les variables.
+```
 
 
 
