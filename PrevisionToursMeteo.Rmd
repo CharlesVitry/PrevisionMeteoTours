@@ -1376,7 +1376,9 @@ back <- step(full, direction="backward")
 
 ```{r}
 formula(back)
-shapiro.test(lm(back,prevision)$residuals)
+reg.mul.backward <- lm(back,prevision)
+
+shapiro.test(reg.mul.backward$residuals)
 ```
 Les résultats sont différents entre la procédure manuel et automatique.
 
@@ -1827,6 +1829,7 @@ Test du modèle obtenu
 ```{r}
 summary(mod.ridgeopt)
 #shapiro.test(mod.ridgeopt$residuals)
+
 ```
 
 ```{r}
@@ -1837,47 +1840,93 @@ summary(mod.ridgeopt)
 ## Conclusion
 
 <br> </br>
+
+
+Comparaison des résultats des régressions.
+
+
+<br> </br>
+Régression avec toutes variables
+```{r,warning=FALSE}
+library(ROCR)
+library(pROC)
+#prediction
+PredictEntrainement = predict(reg.mul, newdata = prevision)
+PredictTesting = predict(reg.mul, newdata = testing)
+
+#jeu d'entrainement
+auc(prevision$Temperature_Jour_Suivant, PredictEntrainement)
+
+#jeu de test
+auc(testing$Temperature_Jour_Suivant, PredictTesting)
+
+```
+<br> </br>
+Regression avec les plus significatives
+```{r,warning=FALSE}
+library(ROCR)
+library(pROC)
+#prediction
+PredictEntrainement = predict(reg.mulfin, newdata = prevision)
+PredictTesting = predict(reg.mulfin, newdata = testing)
+
+#jeu d'entrainement
+auc(prevision$Temperature_Jour_Suivant, PredictEntrainement)
+
+#jeu de test
+auc(testing$Temperature_Jour_Suivant, PredictTesting)
+```
+<br> </br>
+Régression sans Constante
+```{r,warning=FALSE}
+library(ROCR)
+library(pROC)
+#prediction
+PredictEntrainement = predict(reg.mulSansC, newdata = prevision)
+PredictTesting = predict(reg.mulSansC, newdata = testing)
+
+#jeu d'entrainement
+auc(prevision$Temperature_Jour_Suivant, PredictEntrainement)
+
+#jeu de test
+auc(testing$Temperature_Jour_Suivant, PredictTesting)
+```
+<br> </br>
+Régression forward
+```{r,warning=FALSE}
+library(ROCR)
+library(pROC)
+#prediction
+PredictEntrainement = predict(reg.mul.forward, newdata = prevision)
+PredictTesting = predict(reg.mul.forward, newdata = testing)
+
+#jeu d'entrainement
+auc(prevision$Temperature_Jour_Suivant, PredictEntrainement)
+
+#jeu de test
+auc(testing$Temperature_Jour_Suivant, PredictTesting)
+```
+<br> </br>
+Régression backward
+```{r,warning=FALSE}
+library(ROCR)
+library(pROC)
+#prediction
+PredictEntrainement = predict(reg.mul.backward, newdata = prevision)
+PredictTesting = predict(reg.mul.backward, newdata = testing)
+
+#jeu d'entrainement
+auc(prevision$Temperature_Jour_Suivant, PredictEntrainement)
+
+#jeu de test
+auc(testing$Temperature_Jour_Suivant, PredictTesting)
+```
+
+
+<br> </br>
 Prévision d'une température
 ```{r}
 #voir fin reg multi avec toutes les variables.
 ```
-
-Comparaison des résultats des régressions
-```{r}
-
-```
-
-```{r}
-
-```
-
-```{r}
-
-```
-
-```{r}
-
-```
-
-```{r}
-
-```
-
-```{r}
-
-```
-
-```{r}
-
-```
-
-```{r}
-
-```
-
-```{r}
-
-```
-
 
 
