@@ -76,7 +76,7 @@ Après lecture de la colonne Date, les données sont collectés de 2010 jusqu'à
 
 
 \newpage
-Nous avpns cependant une limite à notre analyse.
+Nous avons cependant une limite à notre analyse.
 Puisque l'ensemble de ces observations est tirés d'une seule station d'observation.
 ![Data_Location.png](Data_Location.png){width=50%}
 <br> </br>
@@ -124,9 +124,9 @@ data$TempÃ.rature.minimale.du.sol.sur.12.heures..en.Â.C. <- NULL
 ```
 
 <br> </br>
-Retirons les variables qualitatives
+Retirons les variables qualitatives.
 
-type de tendance barométrique et temps présent est mis quali- mi quanti, nous ne le traitons pas
+Type de tendance barométrique et temps présent est mis quali- mi quanti, nous ne les traiterons pas
 ```{r}
 data$Type.de.tendance.baromÃ.trique <- NULL
 data$Temps.prÃ.sent <- NULL
@@ -150,8 +150,9 @@ data <- data[order(as.Date(data$Date)),]
 
 ```
 <br> </br>
+
+
 Observons les valeurs manquantes des variables restantes
-Existe t'il une fonction pour tester toutes les variables ?
 ```{r,results='hide'}
 #1
 sum(is.na(data$Pression.au.niveau.mer))
@@ -262,8 +263,11 @@ sum(is.na(data$mois_de_l_annee))
 
 ```
 On en déduit cela
-plus 20 000 manquants: 
-* $Type.des.nuages.de.l.Ã.tage.infÃ.rieur
+
+
+plus 20 000 manquants:
+<ul>
+* $Type.des.nuages.de.l.Ã.tage.infÃ.rieur 
 * $Type.des.nuages.de.l.Ã.tage.moyen
 * $Type.des.nuages.de.l.Ã.tage.supÃ.rieur
 * $GÃ.opotentiel
@@ -286,8 +290,12 @@ plus 20 000 manquants:
 * $TempÃ.rature.minimale.sur.12.heures..Â.C.
 * $TempÃ.rature.maximale.sur.12.heures..Â.C.
 * $TempÃ.rature.maximale.sur.24.heures..Â.C.
+</ul>
+
 
 Plus de 10 000:
+
+<ul>
 * $NebulositÃ..totale
 * $Hauteur.de.la.base.des.nuages.de.l.Ã.tage.infÃ.rieur
 * $Variation.de.pression.en.24.heures
@@ -299,9 +307,11 @@ Plus de 10 000:
 * $PrÃ.cipitations.dans.les.24.derniÃ.res.heures
 * $NÃ.bulositÃ..couche.nuageuse.1
 * $TempÃ.rature.minimale.du.sol.sur.12.heures..en.Â.C.
-
+</ul>
 plus de 5000:
+<ul>
 * $NÃ.bulositÃ...des.nuages.de.l..Ã.tage.infÃ.rieur
+</ul>
 
 <br> </br>
 Création d'un jeu de donnée où on supprimme que les plus de 30 000
@@ -318,7 +328,7 @@ Création d'un jeu de donnée où on supprimme que les plus de 30 000
 #data2$Hauteur.de.base.3 <- NULL
 #data2$Type.nuage.4 <- NULL
 ```
-Test des régressions sur cet ensemble : plus mauvais que l'autre jeu de données.
+Test des régressions sur cet ensemble : exactement les mêmes résultats.
 
 
 
@@ -361,7 +371,9 @@ data$TempÃ.rature..Â.C. <- NULL
 ```
 
 <br> </br>
-Nous sommes alors à 32 variables
+Nous sommes alors à 32 variables.
+
+
 Mais combien d'observations si l'on retire les lignes avec des manquants ?
 ```{r, results='hide'}
 which(is.na(data))
@@ -426,12 +438,12 @@ prevision$jour <- NULL
 
 
 ```
-
+<br> </br>
 On a pas supprimmer le paramètre mois pour faire un test (en utilisant la statistique de student.)
 ```{r}
 prevision$mois <- ifelse(prevision$mois < 5 ,"Hiver","Pas Hiver")
 ```
-
+<br> </br>
 Il y a t'il une différence significative de moyenne de température entre les relevés en Hiver et les autres ?
 ```{r}
 #Welch correction inclus dans la fonction t.test()
@@ -441,6 +453,7 @@ test1
 
 la p-value est inférieur à 0.05, on rejette HO"Les moyennes de températures sont égales"
 La différence est très significative.
+<br> </br>
 <br> </br>
 ```{r}
 prevision$mois <- NULL
@@ -455,7 +468,7 @@ La première méthode utilisé n'était pas correct puisque l'on décalait dans 
 puis on supprimait la première observation.
 
 
-```{r}
+```{r,warning=FALSE}
 #Mauvaise méthode
 #data$TemperatureDecaler <- lag(data$TempÃ.rature)
 #on supprimme la première observation
@@ -474,12 +487,12 @@ prevision = slice(prevision, 1:(n() -1))
 data = slice(data, 1:(n() -662))
 
 ```
-
+<br> </br>
 ```{r}
-dim(data)
 dim(prevision)
 ```
-4999 observations de 21 variables, cela est suffisant pour la régression multiple
+1324 *0.8 observations de 21 variables,
+cela est suffisant pour la régression multiple.
 
 <br> </br>
 
@@ -579,16 +592,12 @@ modele <- aov( Temperature_Jour_Suivant ~Pression.au.niveau.mer +
          TempÃ.rature
               ,prevision)
 
-      
-
-
-
-
 anova(modele)
 ```
 Les intéractions de l'Humidité et du point de Rosé sont les plus fortes.
 Etonament la température mesuré vers 13h a une très faible intéraction comparé à la température mesuré au moment du point de rosé.
-
+<br> </br>
+<br> </br>
 
 On sépare notre jeu entre un jeu d'entrainement et un jeu de test.
 ```{r}
@@ -677,15 +686,17 @@ Tests de regression sur notre jeu complet.
 ```
 Toutes les régressions testés affichent des résidus non gaussiens. Ces régressions sont inexploitable au delà de notre échantillon.
 
-
-Testons avec le jeu de prévision.
+<br> </br>
+Regression avec toutes les variables.
 ```{r}
 reg.mul <- lm(Temperature_Jour_Suivant ~.,prevision)
 shapiro.test(reg.mul$residuals)
 
 ```
 De même les résidus ne sont pas gaussiens.
+
 La p-value est inferieur à 5% donc on rejette H0, les Ei ne suivent pas des lois normales (résidus non gaussiens)
+
 !! les tests de Fisher et Student ne sont pas valables. !!
 
 Quels options sont possibles lorsque notre régression est mauvaise ?
@@ -706,8 +717,7 @@ summary(reg.mul)
 
 Les résidus estimés ont une moyenne de 0. 
 
-L'observation suivante dépend d'une execution à l'autre du code (selon l'échantillonage) : 
-Il nous est indiqué que 3 variables sont significatives, il y en a peu car les variables doivent être très corréllés
+Il nous est indiqué que 5 variables sont significatives, il y en a peu car les variables doivent être très corréllés.
 
 Attention, Nous ne pouvons écrire que Temperature du jour suivant = 40 + TempÃ.rature.minimale.du.sol.sur.12.heures  * 3.3 + Variation.de.pression.en.24.heures  * 5  ,
 il faut refaire le modèle avec uniquement ces variables. 
@@ -758,13 +768,13 @@ Touts les paramètres sont significatifs.
 ```{r}
 shapiro.test(reg.mulfin$residuals)
 ```
-Mais le test sur les résidus est toujours mauvais.
+
 
 <br> </br>
-## Matrice des corrélations des variables explicative
+### Matrice des corrélations des variables explicative
 <br> </br>
 Corrélation entre toutes les variables
-```{r}
+```{r,results='hide'}
 #correlation
 mcor <- cor(prevision)
 
@@ -774,9 +784,12 @@ mcor
 
 
 ```
-On remarque que des groupes entre variables de memes unités se forme tel vitesse du vent avec les données sur les rafales, 
+On remarque que des groupes entre variables de memes unités se forme tel vitesse du vent avec les données sur les rafales.
+
 Les corrélations les plus importantes sont celles avec Temperature du jour suivant qui est fortement correlés à 3 autres variables.
+
 A noter que nos variables ont des fortes corrélations, nous verrons cet impact avec la régression sur ACP.
+
 <br> </br>
 Visualisation graphique des correlations.
 ```{r}
@@ -844,11 +857,15 @@ add1(reg1, scope =~Pression.au.niveau.mer +
        , test="F" )
 ```
 On remarque avec les différentes Pvalues que de nombreuses variables sont éligibles à la rentrée dans le modèle.
+
 La F value nous indique si l'augmentation du R² est significative.
 Par exemple, pour la variable "Pression.au.niveau.mer", l'hypothèse H0 est "Bêta^Pression.au.niveau.mer = 0"
+
 Si cela est significatif on peut introduire la variable dans le modèle.
 
+
 On remarque que plusieurs variables affiche une pvalue de 2.2e-16 , càd le nbre le plus bas affichable par R.
+
 Je départage ces variables en prenant en compte le critère AIC.
 Je prends le critère AIC le plus bas, ce n'est pas préciser mais il semble qu'il s'agisse du coefficient corrigé (lorsque n/k > 40)
 cela permet de maximiser la qualité de l'ajustement en pénalisant l'over-fitting.
@@ -893,7 +910,7 @@ add1(update(reg1,~.+TempÃ.rature.minimale.du.sol.sur.12.heures),
 ```
 <br> </br>
 On introduit les variables jusqu'à que aucune ai une augmentation du R significative lors de son introduction dans le modèle.
-```{r}
+```{r,results='hide'}
 
 add1(update(reg1,~.+TempÃ.rature.minimale.du.sol.sur.12.heures+
             TempÃ.rature  ),
@@ -923,7 +940,7 @@ add1(update(reg1,~.+TempÃ.rature.minimale.du.sol.sur.12.heures+
        , test="F" )
 ```
 
-```{r}
+```{r,results='hide'}
 add1(update(reg1,~.+TempÃ.rature.minimale.du.sol.sur.12.heures+
             TempÃ.rature +
               Rafales.sur.une.pÃ.riode   ),
@@ -953,7 +970,7 @@ add1(update(reg1,~.+TempÃ.rature.minimale.du.sol.sur.12.heures+
        , test="F" )
 ```
 
-```{r}
+```{r,results='hide'}
 add1(update(reg1,~.+TempÃ.rature.minimale.du.sol.sur.12.heures+
             TempÃ.rature +
               Rafales.sur.une.pÃ.riode +
@@ -984,7 +1001,7 @@ add1(update(reg1,~.+TempÃ.rature.minimale.du.sol.sur.12.heures+
        , test="F" )
 ```
 
-```{r}
+```{r,results='hide'}
 add1(update(reg1,~.+TempÃ.rature.minimale.du.sol.sur.12.heures+
             TempÃ.rature +
               Rafales.sur.une.pÃ.riode +
@@ -1017,7 +1034,7 @@ add1(update(reg1,~.+TempÃ.rature.minimale.du.sol.sur.12.heures+
        , test="F" )
 ```
 
-```{r}
+```{r,results='hide'}
 add1(update(reg1,~.+TempÃ.rature.minimale.du.sol.sur.12.heures+
             TempÃ.rature +
               Rafales.sur.une.pÃ.riode +
@@ -1051,7 +1068,7 @@ add1(update(reg1,~.+TempÃ.rature.minimale.du.sol.sur.12.heures+
        , test="F" )
 ```
 
-```{r}
+```{r,results='hide'}
 add1(update(reg1,~.+TempÃ.rature.minimale.du.sol.sur.12.heures+
             TempÃ.rature +
               Rafales.sur.une.pÃ.riode +
@@ -1089,7 +1106,7 @@ add1(update(reg1,~.+TempÃ.rature.minimale.du.sol.sur.12.heures+
 
 
 
-```{r}
+```{r,results='hide'}
 add1(update(reg1,~.+TempÃ.rature.minimale.du.sol.sur.12.heures+
             TempÃ.rature +
               Rafales.sur.une.pÃ.riode +
@@ -1125,7 +1142,7 @@ add1(update(reg1,~.+TempÃ.rature.minimale.du.sol.sur.12.heures+
        , test="F" )
 ```
 Aucune variable à introduire, on arrete notre forward selection ici.
-
+<br> </br>
 Modele de la forward regression
 ```{r}
 reg.mul.forward <- lm(Temperature_Jour_Suivant~
@@ -1146,11 +1163,11 @@ reg.mul.forward <- lm(Temperature_Jour_Suivant~
 
 summary(reg.mul.forward)
 ```
+<br> </br>
 On test les résidus
 ```{r}
 shapiro.test(reg.mul.forward$residuals)
 ```
-Le résultat est toujours mauvais.
 
 
 <br> </br>
@@ -1174,25 +1191,25 @@ lm.full <- lm(Temperature_Jour_Suivant ~.,prevision)
 drop1(lm.full,test="F")
 ```
 à chaque itération, on retire la p-value de F la plus forte
-```{r}
+```{r,results='hide'}
 drop1(update(lm.full,~.-HumiditÃ. 
              ), test="F")
 ```
 
-```{r}
+```{r,results='hide'}
 drop1(update(lm.full,~.-HumiditÃ. 
              -PrÃ.cipitations.dans.les.3.derniÃ.res.heures
              ), test="F")
 ```
 
-```{r}
+```{r,results='hide'}
 drop1(update(lm.full,~.-HumiditÃ. 
              -PrÃ.cipitations.dans.les.3.derniÃ.res.heures
              -PrÃ.cipitations.dans.les.12.derniÃ.res.heures 
              ), test="F")
 ```
 
-```{r}
+```{r,results='hide'}
 drop1(update(lm.full,~.-HumiditÃ. 
              -PrÃ.cipitations.dans.les.3.derniÃ.res.heures
              -PrÃ.cipitations.dans.les.12.derniÃ.res.heures 
@@ -1200,7 +1217,7 @@ drop1(update(lm.full,~.-HumiditÃ.
              ), test="F")
 ```
 
-```{r}
+```{r,results='hide'}
 drop1(update(lm.full,~.-HumiditÃ. 
              -PrÃ.cipitations.dans.les.3.derniÃ.res.heures
              -PrÃ.cipitations.dans.les.12.derniÃ.res.heures 
@@ -1209,7 +1226,7 @@ drop1(update(lm.full,~.-HumiditÃ.
              ), test="F")
 ```
 
-```{r}
+```{r,results='hide'}
 drop1(update(lm.full,~.-HumiditÃ. 
              -PrÃ.cipitations.dans.les.3.derniÃ.res.heures
              -PrÃ.cipitations.dans.les.12.derniÃ.res.heures 
@@ -1219,7 +1236,7 @@ drop1(update(lm.full,~.-HumiditÃ.
              ), test="F")
 ```
 
-```{r}
+```{r,results='hide'}
 drop1(update(lm.full,~.-HumiditÃ. 
              -PrÃ.cipitations.dans.les.3.derniÃ.res.heures
              -PrÃ.cipitations.dans.les.12.derniÃ.res.heures 
@@ -1230,7 +1247,7 @@ drop1(update(lm.full,~.-HumiditÃ.
              ), test="F")
 ```
 
-```{r}
+```{r,results='hide'}
 
 drop1(update(lm.full,~.-HumiditÃ. 
              -PrÃ.cipitations.dans.les.3.derniÃ.res.heures
@@ -1244,7 +1261,7 @@ drop1(update(lm.full,~.-HumiditÃ.
 
 ```
 
-```{r}
+```{r,results='hide'}
 drop1(update(lm.full,~.-HumiditÃ. 
              -PrÃ.cipitations.dans.les.3.derniÃ.res.heures
              -PrÃ.cipitations.dans.les.12.derniÃ.res.heures 
@@ -1257,7 +1274,7 @@ drop1(update(lm.full,~.-HumiditÃ.
              ), test="F")
 ```
 
-```{r}
+```{r,results='hide'}
 drop1(update(lm.full,~.-HumiditÃ. 
              -PrÃ.cipitations.dans.les.3.derniÃ.res.heures
              -PrÃ.cipitations.dans.les.12.derniÃ.res.heures 
@@ -1271,7 +1288,7 @@ drop1(update(lm.full,~.-HumiditÃ.
              ), test="F")
 ```
 
-```{r}
+```{r,results='hide'}
 drop1(update(lm.full,~.-HumiditÃ. 
              -PrÃ.cipitations.dans.les.3.derniÃ.res.heures
              -PrÃ.cipitations.dans.les.12.derniÃ.res.heures 
@@ -1286,7 +1303,7 @@ drop1(update(lm.full,~.-HumiditÃ.
              ), test="F")
 ```
 
-```{r}
+```{r,results='hide'}
 drop1(update(lm.full,~.-HumiditÃ. 
              -PrÃ.cipitations.dans.les.3.derniÃ.res.heures
              -PrÃ.cipitations.dans.les.12.derniÃ.res.heures 
@@ -1302,7 +1319,7 @@ drop1(update(lm.full,~.-HumiditÃ.
              ), test="F")
 ```
 
-```{r}
+```{r,results='hide'}
 drop1(update(lm.full,~.-HumiditÃ. 
              -PrÃ.cipitations.dans.les.3.derniÃ.res.heures
              -PrÃ.cipitations.dans.les.12.derniÃ.res.heures 
@@ -1319,7 +1336,7 @@ drop1(update(lm.full,~.-HumiditÃ.
              
              ), test="F")
 ```
-
+<br> </br>
 Toutes les variables sont significatives, voici le modele backward selection complet.
 ```{r}
 summary(update(lm.full,~.-HumiditÃ. 
@@ -1353,7 +1370,7 @@ shapiro.test(update(lm.full,~.-HumiditÃ.
 ```
 <br> </br>
 Test par réalisation automatique de la backward selection.
-```{r}
+```{r,results='hide'}
 back <- step(full, direction="backward")
 ```
 
@@ -1364,7 +1381,7 @@ shapiro.test(lm(back,prevision)$residuals)
 Les résultats sont différents entre la procédure manuel et automatique.
 
 <br> </br>
-# Comparaison des résultats des régressions
+# 
 
 A rediger.
 
@@ -1404,7 +1421,7 @@ lm.full <- lm(Temperature_Jour_Suivant ~.,previsionACP)
 lm.null <- lm(Temperature_Jour_Suivant ~1,previsionACP)
 ```
 
-```{r}
+```{r,results='hide'}
 add1(lm.null,
      scope=~
        Dim.1+
@@ -1433,7 +1450,7 @@ add1(lm.null,
        )
 ```
 
-```{r}
+```{r,echo=FALSE,results='hide'}
 add1(update(lm.null,~.+Dim.2
             ),
      scope=~
@@ -1465,7 +1482,7 @@ add1(update(lm.null,~.+Dim.2
      )
 ```
 
-```{r}
+```{r,echo=FALSE,results='hide'}
 add1(update(lm.null,~. + Dim.2 + Dim.3
             ),
      scope=~
@@ -1497,7 +1514,7 @@ add1(update(lm.null,~. + Dim.2 + Dim.3
      )
 ```
 
-```{r}
+```{r,echo=FALSE,results='hide'}
 add1(update(lm.null,~.+Dim.1 +  Dim.2 +    Dim.3
             ),
      scope=~
@@ -1529,7 +1546,7 @@ add1(update(lm.null,~.+Dim.1 +  Dim.2 +    Dim.3
      )
 ```
 
-```{r}
+```{r,echo=FALSE,results='hide'}
 add1(update(lm.null,~.+Dim.1 +  Dim.2 +    Dim.3 +   Dim.4
             ),
      scope=~
@@ -1561,7 +1578,7 @@ add1(update(lm.null,~.+Dim.1 +  Dim.2 +    Dim.3 +   Dim.4
      )
 ```
 
-```{r}
+```{r,echo=FALSE,results='hide'}
 add1(update(lm.null,~.+Dim.1 +  Dim.2 +    Dim.3 +   Dim.4 +   Dim.7 
             ),
      scope=~
@@ -1593,7 +1610,7 @@ add1(update(lm.null,~.+Dim.1 +  Dim.2 +    Dim.3 +   Dim.4 +   Dim.7
      )
 ```
 
-```{r}
+```{r,echo=FALSE,results='hide'}
 add1(update(lm.null,~.+Dim.1 +  Dim.2 +    Dim.3 +   Dim.4 + Dim.6+  Dim.7  
             ),
      scope=~
@@ -1625,7 +1642,7 @@ add1(update(lm.null,~.+Dim.1 +  Dim.2 +    Dim.3 +   Dim.4 + Dim.6+  Dim.7
      )
 ```
 
-```{r}
+```{r,echo=FALSE,results='hide'}
 add1(update(lm.null,~.+Dim.1 +  Dim.2 +    Dim.3 +   Dim.4 +Dim.5+ Dim.6+  Dim.7  
             ),
      scope=~
@@ -1657,7 +1674,7 @@ add1(update(lm.null,~.+Dim.1 +  Dim.2 +    Dim.3 +   Dim.4 +Dim.5+ Dim.6+  Dim.7
      )
 ```
 
-```{r}
+```{r,echo=FALSE,results='hide'}
 add1(update(lm.null,~.+Dim.1 +  Dim.2 +    Dim.3 +   Dim.4 +    Dim.5 +  Dim.6 + Dim.7 +  Dim.8
             ),
      scope=~
@@ -1689,7 +1706,7 @@ add1(update(lm.null,~.+Dim.1 +  Dim.2 +    Dim.3 +   Dim.4 +    Dim.5 +  Dim.6 +
      )
 ```
 
-```{r}
+```{r,echo=FALSE,results='hide'}
 add1(update(lm.null,~.+Dim.1 +  Dim.2 +    Dim.3 +   Dim.4 +    Dim.5 +  Dim.6 + Dim.7 +  Dim.8 +  Dim.11
             ),
      scope=~
@@ -1721,7 +1738,7 @@ add1(update(lm.null,~.+Dim.1 +  Dim.2 +    Dim.3 +   Dim.4 +    Dim.5 +  Dim.6 +
      )
 ```
 
-```{r}
+```{r,echo=FALSE,results='hide'}
 add1(update(lm.null,~.+Dim.1 +  Dim.2 +    Dim.3 +   Dim.4 +    Dim.5 +  Dim.6 + Dim.7 +  Dim.8 +  Dim.11 +   Dim.10
             ),
      scope=~
@@ -1752,6 +1769,8 @@ add1(update(lm.null,~.+Dim.1 +  Dim.2 +    Dim.3 +   Dim.4 +    Dim.5 +  Dim.6 +
      
      )
 ```
+<br> </br><br> </br>
+
 J'ai refait cette regression en prenant soit le plus petit RSS ou soit les dimensions dans l'ordre, le résultat est le meme.
 
 
@@ -1761,7 +1780,7 @@ reg.ACP <- lm(Temperature_Jour_Suivant~Dim.1 +  Dim.2 +    Dim.3 +   Dim.4 +    
 
 summary(reg.ACP)
 ```
-
+<br> </br>
 ```{r}
 shapiro.test(reg.ACP$residuals)
 ```
@@ -1798,7 +1817,7 @@ Création du modèle optimiser
 mod.ridgeopt =lm.ridge(Temperature_Jour_Suivant ~. , data=prevision, lambda = 101.01)
 ```
 <br> </br>
-coefficient du modele
+Coefficient du modele
 ```{r}
 coeff = coef(mod.ridgeopt)
 coeff
@@ -1821,6 +1840,43 @@ summary(mod.ridgeopt)
 Prévision d'une température
 ```{r}
 #voir fin reg multi avec toutes les variables.
+```
+
+Comparaison des résultats des régressions
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
 ```
 
 
