@@ -420,14 +420,33 @@ data$jour <- NULL
 prevision$Date <- NULL
 prevision$DateEnJour <- NULL
 prevision$annee <- NULL
-prevision$mois <- NULL
+#prevision$mois <- NULL
 prevision$jour <- NULL
 
 
 
 ```
-Nous avons désormais deux jeux pour réaliser une régression linéaire,
-le premier avec 5661 observations , le second avec une observation par jour dans le but de déterminer la précipation du jour à venir.
+
+On a pas supprimmer le paramètre mois pour faire un test (en utilisant la statistique de student.)
+```{r}
+prevision$mois <- ifelse(prevision$mois < 5 ,"Hiver","Pas Hiver")
+```
+
+Il y a t'il une différence significative de moyenne de température entre les relevés en Hiver et les autres ?
+```{r}
+#Welch correction inclus dans la fonction t.test()
+test1<-t.test(TempÃ.rature ~ mois, prevision)
+test1
+```
+
+la p-value est inférieur à 0.05, on rejette HO"Les moyennes de températures sont égales"
+La différence est très significative.
+<br> </br>
+```{r}
+prevision$mois <- NULL
+```
+Notre jeu de donnée pour la regression linéaire est prêt.
+
 <br> </br>
 Pour le jeu de prévision,
 nous creons une colonne température mais décaler de 1 jour.
@@ -531,6 +550,54 @@ Nous n'avons pas importer en UTF-8 pour économiser de la place, donnons des lab
 
 ```
 
+### Anova
+
+Voyons quels paramètres ont le plus d'importance
+```{r }
+
+
+modele <- aov( Temperature_Jour_Suivant ~Pression.au.niveau.mer +
+       Variation.de.pression.en.3.heures +
+       Direction.du.vent.moyen.10.mn  +
+       Vitesse.du.vent.moyen.10.mn  +
+       Point.de.rosÃ.e  +
+       HumiditÃ.     +
+       VisibilitÃ..horizontale +
+       NebulositÃ..totale  +
+       Hauteur.de.la.base.des.nuages.de.l.Ã.tage.infÃ.rieur+
+       Pression.station +
+       Variation.de.pression.en.24.heures  +
+       TempÃ.rature.minimale.du.sol.sur.12.heures +
+       Rafale.sur.les.10.derniÃ.res.minutes   +
+       Rafales.sur.une.pÃ.riode+
+       PrÃ.cipitations.dans.la.derniÃ.re.heure  +
+       PrÃ.cipitations.dans.les.3.derniÃ.res.heures+
+       PrÃ.cipitations.dans.les.6.derniÃ.res.heures  +
+       PrÃ.cipitations.dans.les.12.derniÃ.res.heures  +
+       PrÃ.cipitations.dans.les.24.derniÃ.res.heures+
+       Hauteur.de.base.2+
+         TempÃ.rature
+              ,prevision)
+
+      
+
+
+
+
+anova(modele)
+```
+Les intéractions de l'Humidité et du point de Rosé sont les plus fortes.
+Etonament la température mesuré vers 13h a une très faible intéraction comparé à la température mesuré au moment du point de rosé.
+
+
+On sépare notre jeu entre un jeu d'entrainement et un jeu de test.
+```{r}
+nb_lignes <- sample(1:nrow(prevision), nrow(prevision)*0.80)
+testing <- prevision[-nb_lignes,]
+prevision <- prevision[nb_lignes,]
+
+```
+
 ## Régression multiple avec toutes les variables explicatives
 <br> </br>
 
@@ -541,71 +608,70 @@ Puisque leurs nombre de variables explicatives seront différentes nous utiliser
 
 
 <br> </br>
+Tests de regression sur notre jeu complet.
 ```{r}
+#reg.mul <- lm(Pression.au.niveau.mer~.,data)
+#shapiro.test(reg.mul$residuals)
 
+#reg.mul <- lm(Variation.de.pression.en.3.heures~.,data)
+#shapiro.test(reg.mul$residuals)
 
-reg.mul <- lm(Pression.au.niveau.mer~.,data)
-shapiro.test(reg.mul$residuals)
+#reg.mul <- lm(Direction.du.vent.moyen.10.mn~.,data)
+#shapiro.test(reg.mul$residuals)
 
-reg.mul <- lm(Variation.de.pression.en.3.heures~.,data)
-shapiro.test(reg.mul$residuals)
+#reg.mul <- lm(Vitesse.du.vent.moyen.10.mn~.,data)
+#shapiro.test(reg.mul$residuals)
 
-reg.mul <- lm(Direction.du.vent.moyen.10.mn~.,data)
-shapiro.test(reg.mul$residuals)
+#reg.mul <- lm(Point.de.rosÃ.e~.,data)
+#shapiro.test(reg.mul$residuals)
 
-reg.mul <- lm(Vitesse.du.vent.moyen.10.mn~.,data)
-shapiro.test(reg.mul$residuals)
+#reg.mul <- lm(HumiditÃ.~.,data)
+#shapiro.test(reg.mul$residuals)
 
-reg.mul <- lm(Point.de.rosÃ.e~.,data)
-shapiro.test(reg.mul$residuals)
+#reg.mul <- lm(VisibilitÃ..horizontale~.,data)
+#shapiro.test(reg.mul$residuals)
 
-reg.mul <- lm(HumiditÃ.~.,data)
-shapiro.test(reg.mul$residuals)
+#reg.mul <- lm(NebulositÃ..totale~.,data)
+#shapiro.test(reg.mul$residuals)
 
-reg.mul <- lm(VisibilitÃ..horizontale~.,data)
-shapiro.test(reg.mul$residuals)
+#reg.mul <- lm(Hauteur.de.la.base.des.nuages.de.l.Ã.tage.infÃ.rieur~.,data)
+#shapiro.test(reg.mul$residuals)
 
-reg.mul <- lm(NebulositÃ..totale~.,data)
-shapiro.test(reg.mul$residuals)
+#reg.mul <- lm(Pression.station~.,data)
+#shapiro.test(reg.mul$residuals)
 
-reg.mul <- lm(Hauteur.de.la.base.des.nuages.de.l.Ã.tage.infÃ.rieur~.,data)
-shapiro.test(reg.mul$residuals)
+#reg.mul <- lm(Variation.de.pression.en.24.heures~.,data)
+#shapiro.test(reg.mul$residuals)
 
-reg.mul <- lm(Pression.station~.,data)
-shapiro.test(reg.mul$residuals)
+#reg.mul <- lm(TempÃ.rature.minimale.du.sol.sur.12.heures~.,data)
+#shapiro.test(reg.mul$residuals)
 
-reg.mul <- lm(Variation.de.pression.en.24.heures~.,data)
-shapiro.test(reg.mul$residuals)
+#reg.mul <- lm(Rafale.sur.les.10.derniÃ.res.minutes~.,data)
+#shapiro.test(reg.mul$residuals)
 
-reg.mul <- lm(TempÃ.rature.minimale.du.sol.sur.12.heures~.,data)
-shapiro.test(reg.mul$residuals)
+#reg.mul <- lm(Rafales.sur.une.pÃ.riode~.,data)
+#shapiro.test(reg.mul$residuals)
 
-reg.mul <- lm(Rafale.sur.les.10.derniÃ.res.minutes~.,data)
-shapiro.test(reg.mul$residuals)
+#reg.mul <- lm(PrÃ.cipitations.dans.la.derniÃ.re.heure~.,data)
+#shapiro.test(reg.mul$residuals)
 
-reg.mul <- lm(Rafales.sur.une.pÃ.riode~.,data)
-shapiro.test(reg.mul$residuals)
+#reg.mul <- lm(PrÃ.cipitations.dans.les.3.derniÃ.res.heures~.,data)
+#shapiro.test(reg.mul$residuals)
 
-reg.mul <- lm(PrÃ.cipitations.dans.la.derniÃ.re.heure~.,data)
-shapiro.test(reg.mul$residuals)
+#reg.mul <- lm(PrÃ.cipitations.dans.les.6.derniÃ.res.heures~.,data)
+#shapiro.test(reg.mul$residuals)
 
-reg.mul <- lm(PrÃ.cipitations.dans.les.3.derniÃ.res.heures~.,data)
-shapiro.test(reg.mul$residuals)
+#reg.mul <- lm(PrÃ.cipitations.dans.les.12.derniÃ.res.heures~.,data)
+#shapiro.test(reg.mul$residuals)
 
-reg.mul <- lm(PrÃ.cipitations.dans.les.6.derniÃ.res.heures~.,data)
-shapiro.test(reg.mul$residuals)
+#reg.mul <- lm(PrÃ.cipitations.dans.les.24.derniÃ.res.heures~.,data)
+#shapiro.test(reg.mul$residuals)
 
-reg.mul <- lm(PrÃ.cipitations.dans.les.12.derniÃ.res.heures~.,data)
-shapiro.test(reg.mul$residuals)
+#reg.mul <- lm(Hauteur.de.base.2~.,data)
+#shapiro.test(reg.mul$residuals)
 
-reg.mul <- lm(PrÃ.cipitations.dans.les.24.derniÃ.res.heures~.,data)
-shapiro.test(reg.mul$residuals)
-
-reg.mul <- lm(Hauteur.de.base.2~.,data)
-shapiro.test(reg.mul$residuals)
-
-reg.mul <- lm(TempÃ.rature~.,data)
-shapiro.test(reg.mul$residuals)
+#reg.mul <- lm(TempÃ.rature~.,data)
+#shapiro.test(reg.mul$residuals)
 
 
 ```
