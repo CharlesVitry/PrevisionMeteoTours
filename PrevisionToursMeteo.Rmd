@@ -18,7 +18,7 @@ output:
 <style type="text/css">
 
 body{ /* Normal  */
-      font-size: 16px;
+      font-size: 20px;
   }
 td {  /* Table  */
   font-size: 8px;
@@ -455,10 +455,35 @@ la p-value est inférieur à 0.05, on rejette HO"Les moyennes de températures s
 La différence est très significative.
 <br> </br>
 <br> </br>
-```{r}
+
+
+Voyons quels paramètres ont le plus d'importance
+```{r }
+modele <- aov( TempÃ.rature ~mois ,prevision)
+
+anova(modele)
+
+```
+<br> </br>
+
+Test sur les résidus
+```{r }
+residus <- residuals(modele)
+shapiro.test(residus)
+```
+Le test n'est pas significatif.
+<br> </br>
+
+Puisque le test n'est pas significatif,Réalison un test de Kruskal.
+```{r }
+kruskal.test(TempÃ.rature ~mois ,prevision)
 prevision$mois <- NULL
 ```
-Notre jeu de donnée pour la regression linéaire est prêt.
+La différence est très significative.
+
+Il est donc conseillé de mieux se couvrir en hiver au vu de la différence très significative de température.
+
+
 
 <br> </br>
 Pour le jeu de prévision,
@@ -563,57 +588,31 @@ Nous n'avons pas importer en UTF-8 pour économiser de la place, donnons des lab
 
 ```
 
-### Anova
-
-Voyons quels paramètres ont le plus d'importance
-```{r }
 
 
-modele <- aov( Temperature_Jour_Suivant ~Pression.au.niveau.mer +
-       Variation.de.pression.en.3.heures +
-       Direction.du.vent.moyen.10.mn  +
-       Vitesse.du.vent.moyen.10.mn  +
-       Point.de.rosÃ.e  +
-       HumiditÃ.     +
-       VisibilitÃ..horizontale +
-       NebulositÃ..totale  +
-       Hauteur.de.la.base.des.nuages.de.l.Ã.tage.infÃ.rieur+
-       Pression.station +
-       Variation.de.pression.en.24.heures  +
-       TempÃ.rature.minimale.du.sol.sur.12.heures +
-       Rafale.sur.les.10.derniÃ.res.minutes   +
-       Rafales.sur.une.pÃ.riode+
-       PrÃ.cipitations.dans.la.derniÃ.re.heure  +
-       PrÃ.cipitations.dans.les.3.derniÃ.res.heures+
-       PrÃ.cipitations.dans.les.6.derniÃ.res.heures  +
-       PrÃ.cipitations.dans.les.12.derniÃ.res.heures  +
-       PrÃ.cipitations.dans.les.24.derniÃ.res.heures+
-       Hauteur.de.base.2+
-         TempÃ.rature
-              ,prevision)
-
-anova(modele)
-```
-Les intéractions de l'Humidité et du point de Rosé sont les plus fortes.
-Etonament la température mesuré vers 13h a une très faible intéraction comparé à la température mesuré au moment du point de rosé.
 <br> </br>
 <br> </br>
 
 On sépare notre jeu entre un jeu d'entrainement et un jeu de test.
 ```{r}
 nb_lignes <- sample(1:nrow(prevision), nrow(prevision)*0.80)
-testing <- prevision[-nb_lignes,]
+testing <- prevision[1:nrow(prevision)*0.80,]
 prevision <- prevision[nb_lignes,]
 
-```
 
+
+```
+Remarque importante : les lignes ne sont plus ordonnés chronologiquement.
+
+Notre jeu de donnée pour la regression linéaire est prêt.
+<br> </br>
 ## Régression multiple avec toutes les variables explicatives
 <br> </br>
 
 Nous allons effectuer plusieurs régressions, nous allons utiliser un jeu d'entrainement et un jeu de test pour comparer les différentes régressions.
 Puisque leurs nombre de variables explicatives seront différentes nous utiliserons le coefficient R² ajusté.
 
-![](Rcarre.png)
+![](images/Rcarre.png)
 
 
 <br> </br>
@@ -684,7 +683,8 @@ Tests de regression sur notre jeu complet.
 
 
 ```
-Toutes les régressions testés affichent des résidus non gaussiens. Ces régressions sont inexploitable au delà de notre échantillon.
+Toutes les régressions testés affichent des résidus non gaussiens. 
+Ceci n'est pas surprenant dans la mesure où nous avons 5000 observations.
 
 <br> </br>
 Regression avec toutes les variables.
@@ -693,12 +693,13 @@ reg.mul <- lm(Temperature_Jour_Suivant ~.,prevision)
 shapiro.test(reg.mul$residuals)
 
 ```
-De même les résidus ne sont pas gaussiens.
-
 La p-value est inferieur à 5% donc on rejette H0, les Ei ne suivent pas des lois normales (résidus non gaussiens)
 
-!! les tests de Fisher et Student ne sont pas valables. !!
+Le test shapiro affiche des résidus non gaussiens, mais ceci peut être expliqué par notre grand nombre d'observations.
+Cette hypothèse se confirmera lorsque nous regarderons l'histogramme des résidus.
 
+Ainsi nos tests de Fisher et student seront valables.
+<br> </br>
 Quels options sont possibles lorsque notre régression est mauvaise ?
 
 Premièrement, on vérifie par un test de Fisher que le modèle est valide.
@@ -723,8 +724,10 @@ Attention, Nous ne pouvons écrire que Temperature du jour suivant = 40 + TempÃ
 il faut refaire le modèle avec uniquement ces variables. 
 
 
-Ces valeurs ont complètement changer par la modification de l'échantillon, cette régression est totalement dépendante de son échantillon,
-le résultat des tests sur les résidus nous confirmera cela. Notre R² de 1 est complètement inutile.
+Un R² de 0.67 est trouvé.
+D'où 67% de la variance est expliqué par la régression.
+
+Pour comparer nos régressions,nous utiliserons le R² ajusté.
 
 <br> </br>
 Visualisons les résidus par un histogramme
@@ -732,7 +735,7 @@ Visualisons les résidus par un histogramme
 hist(reg.mul$residuals)
 #hist(reg.mul.prevision$residuals)
 ```
-Etonnant, les résidus semblent centrés.
+Les résidus semblent suivre une loi gaussienne.
 
 <br> </br>
 Réalisons les intervalles de confiance.
@@ -751,6 +754,8 @@ reg.mulSansC <- lm(Temperature_Jour_Suivant~.-1,prevision)
 shapiro.test(reg.mulSansC$residuals)
 summary(reg.mulSansC)
 ```
+R² de 1.
+
 <br> </br>
 On refait une régression avec les variables significatives de reg.mul 
 ```{r}
@@ -909,7 +914,7 @@ add1(update(reg1,~.+TempÃ.rature.minimale.du.sol.sur.12.heures),
 
 ```
 <br> </br>
-On introduit les variables jusqu'à que aucune ai une augmentation du R significative lors de son introduction dans le modèle.
+On introduit les variables jusqu'à que aucune n'ai une augmentation du R significative lors de son introduction dans le modèle.
 ```{r,results='hide'}
 
 add1(update(reg1,~.+TempÃ.rature.minimale.du.sol.sur.12.heures+
@@ -1837,12 +1842,10 @@ summary(mod.ridgeopt)
 ```
 
 <br> </br>
-## Conclusion
+## Comparaison
 
 <br> </br>
 
-
-Comparaison des résultats des régressions.
 
 
 <br> </br>
@@ -1921,12 +1924,39 @@ auc(prevision$Temperature_Jour_Suivant, PredictEntrainement)
 #jeu de test
 auc(testing$Temperature_Jour_Suivant, PredictTesting)
 ```
+<br> </br>
+Toutes nos prédictions de la température du jour suivant sont parfaites !
 
 
+Les différents R² ajusté obtenus, sont :
+
+* 0.99 : Régression sans la constante
+
+* 0.67 : Régression avec toutes les variables 
+
+* 0.60 : Régression avec variables significatives
+
+* 0.67 : Régression forward
+
+* 0.67 : Régression backward
+
+* 0.67 : Régression sur ACP
+
+La régression sans la constante obtiens un R² ajusté de 1, ce qui est logique puisque la droite de régression passe par l'origine.
+
+La régression avec toutes les variables obtient un R² de 0.67, lorsque nous essayons d'obtenir une régression "presque aussi bien" en retirons les variables les moins explicatives, le R² chute à 0.60.
+
+Ensuite, en utilisant les méthodes de protection de la régression, nous obtenons le même R² avec les régressions forward,backward,sur ACP,Ridge que avec la régression avec toutes les variables ! Nous voyons l'efficacité de ces méthodes.
+
+
+
+## Conclusion
 <br> </br>
 Prévision d'une température
 ```{r}
 #voir fin reg multi avec toutes les variables.
 ```
 
+
+(et toutes très mauvaise pour le sur-lendemain)
 
