@@ -735,12 +735,12 @@ Nous n'avons pas importer en UTF-8 pour économiser de la place, donnons des lab
 On sépare notre jeu entre un jeu d'entrainement et un jeu de test.
 ```{r}
 #Avoir toujours les mêmes résultats
-set.seed(1234) 
-
-#on sélectionne 20% des lignes
-nb_lignes <- sample(1:nrow(prevision), nrow(prevision)*0.20)
-testing <- prevision[nb_lignes,]
-prevision <- prevision[-nb_lignes,]
+# set.seed(1234) 
+# 
+# #on sélectionne 20% des lignes
+# nb_lignes <- sample(1:nrow(prevision), nrow(prevision)*0.20)
+# testing <- prevision[nb_lignes,]
+# prevision <- prevision[-nb_lignes,]
 
 
 
@@ -2231,17 +2231,17 @@ Pour les comparaisons qui suivent, nous utilisons nos différents
 <br> </br>
 Test de l'AUC, on utilise un des modèles prédictifs sur le jeu d'entrainement (1324 obs) et sur le jeu de test (331 obs).
 ```{r,warning=FALSE}
-library(ROCR)
-library(pROC)
-#prediction
-PredictEntrainement = predict(reg.mul, newdata = prevision)
-PredictTesting = predict(reg.mul, newdata = testing)
-
-#jeu d'entrainement
-auc(prevision$Temperature_Jour_Suivant, PredictEntrainement)
-
-#jeu de test
-auc(testing$Temperature_Jour_Suivant, PredictTesting)
+# library(ROCR)
+# library(pROC)
+# #prediction
+# PredictEntrainement = predict(reg.mul, newdata = prevision)
+# PredictTesting = predict(reg.mul, newdata = testing)
+# 
+# #jeu d'entrainement
+# auc(prevision$Temperature_Jour_Suivant, PredictEntrainement)
+# 
+# #jeu de test
+# auc(testing$Temperature_Jour_Suivant, PredictTesting)
 
 ```
 Le résultat est une prédiction parfaite, cependant cet indicateur n'est pas interprétable pour notre modèle.
