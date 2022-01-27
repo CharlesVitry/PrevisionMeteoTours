@@ -734,6 +734,9 @@ Nous n'avons pas importer en UTF-8 pour économiser de la place, donnons des lab
 
 On sépare notre jeu entre un jeu d'entrainement et un jeu de test.
 ```{r}
+#Avoir toujours les mêmes résultats
+set.seed(1234) 
+
 #on sélectionne 20% des lignes
 nb_lignes <- sample(1:nrow(prevision), nrow(prevision)*0.20)
 testing <- prevision[nb_lignes,]
@@ -2156,9 +2159,20 @@ ridge_opti = glmnet(x = prevision[,names(prevision) != 'Temperature_Jour_Suivant
 summary(ridge_opti)
 
 ```
-## Régression Lasso
-```{r}
 
+```{r}
+cols = c('pce', 'pop', 'psavert', 'uempmed')
+
+
+pre_proc_val <- preProcess(train[,cols], method = c("center", "scale"))
+
+
+train[,cols] = predict(pre_proc_val, train[,cols])
+
+test[,cols] = predict(pre_proc_val, test[,cols])
+
+
+summary(train)
 ```
 
 ```{r}
@@ -2212,10 +2226,10 @@ summary(ridge_opti)
 
 <br> </br>
 
-Pour les comparaisons qui suivent, nous utilisons nos différents modèles prédictifs sur le jeu d'entrainement (1324 obs) et sur le jeu de test (331 obs).
+Pour les comparaisons qui suivent, nous utilisons nos différents 
 
 <br> </br>
-Régression avec toutes variables
+Test de l'AUC, on utilise un des modèles prédictifs sur le jeu d'entrainement (1324 obs) et sur le jeu de test (331 obs).
 ```{r,warning=FALSE}
 library(ROCR)
 library(pROC)
@@ -2230,85 +2244,16 @@ auc(prevision$Temperature_Jour_Suivant, PredictEntrainement)
 auc(testing$Temperature_Jour_Suivant, PredictTesting)
 
 ```
-<br> </br>
-Regression avec les plus significatives
-```{r,warning=FALSE}
-library(ROCR)
-library(pROC)
-#prediction
-PredictEntrainement = predict(reg.mulfin, newdata = prevision)
-PredictTesting = predict(reg.mulfin, newdata = testing)
+Le résultat est une prédiction parfaite, cependant cet indicateur n'est pas interprétable pour notre modèle.
 
-#jeu d'entrainement
-auc(prevision$Temperature_Jour_Suivant, PredictEntrainement)
+En effet, l'AUC est valable sur la prédiction de classe , pas sur des prévisions qualitatives.
 
-#jeu de test
-auc(testing$Temperature_Jour_Suivant, PredictTesting)
-```
-<br> </br>
-Régression sans Constante
-```{r,warning=FALSE}
-library(ROCR)
-library(pROC)
-#prediction
-PredictEntrainement = predict(reg.mulSansC, newdata = prevision)
-PredictTesting = predict(reg.mulSansC, newdata = testing)
 
-#jeu d'entrainement
-auc(prevision$Temperature_Jour_Suivant, PredictEntrainement)
 
-#jeu de test
-auc(testing$Temperature_Jour_Suivant, PredictTesting)
-```
-<br> </br>
-Régression forward
-```{r,warning=FALSE}
-library(ROCR)
-library(pROC)
-#prediction
-PredictEntrainement = predict(reg.mul.forward, newdata = prevision)
-PredictTesting = predict(reg.mul.forward, newdata = testing)
-
-#jeu d'entrainement
-auc(prevision$Temperature_Jour_Suivant, PredictEntrainement)
-
-#jeu de test
-auc(testing$Temperature_Jour_Suivant, PredictTesting)
-```
-<br> </br>
-Régression backward
-```{r,warning=FALSE}
-library(ROCR)
-library(pROC)
-#prediction
-PredictEntrainement = predict(reg.mul.backward, newdata = prevision)
-PredictTesting = predict(reg.mul.backward, newdata = testing)
-
-#jeu d'entrainement
-auc(prevision$Temperature_Jour_Suivant, PredictEntrainement)
-
-#jeu de test
-auc(testing$Temperature_Jour_Suivant, PredictTesting)
-```
-<br> </br>
-Régression Ridge
-```{r,warning=FALSE}
-# library(ROCR)
-# library(pROC)
-# #prediction
-# PredictEntrainement = predict(ridge_opti, newx = prevision[,names(prevision) != 'Temperature_Jour_Suivant'])
-# PredictTesting = predict(ridge_opti, newdata = testing)
-# 
-# #jeu d'entrainement
-# auc(prevision$Temperature_Jour_Suivant, PredictEntrainement)
-# 
-# #jeu de test
-# auc(testing$Temperature_Jour_Suivant, PredictTesting)
-```
 
 
 <br> </br>
-Toutes nos prédictions de la température du jour suivant sont parfaites !
+Comparons nos régressions avec un indicateur ..
 
 
 Les différents R² ajusté obtenus, sont :
