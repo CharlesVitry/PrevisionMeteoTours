@@ -50,7 +50,7 @@ pre { /* Code block - determines code spacing between lines */
 
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+#knitr::opts_chunk$set(echo = TRUE)
 
 #install for export in pdf file
 #tinytex::install_tinytex()
@@ -582,7 +582,8 @@ test1<-t.test(Température ~ mois, prevision)
 test1
 ```
 
-la p-value est inférieur à 0.05, on rejette HO"Les moyennes de températures sont égales"
+t est la statistique de student (-26.435) et df est le degré de liberté,
+la p-value, qui détermine la significativité du test est inférieur à 0.05, on rejette HO : "Les moyennes de températures sont égales"
 La différence est très significative.
 <br> </br>
 <br> </br>
@@ -641,11 +642,10 @@ puis on supprimait la première observation.
 
 library(Hmisc)
 #prevision$Precipitation_Jour_Suivant <- Lag(prevision$PrÃ.cipitations.dans.les.24.derniÃ.res.heures, shift = -1)
-prevision$Temperature_Jour_Suivant <- Lag(prevision$Température, shift = -2)
+prevision$Temperature_Jour_Suivant <- Lag(prevision$Température, shift = -10)
 #on supprimme la derniere observation
 library(dplyr)
-prevision = slice(prevision, 1:(n() -2))
-
+prevision = slice(prevision, 1:(n() -10))
 
 #De même on réduit la taille du nbre d'observation de data
 data = slice(data, 1:(n() -662))
@@ -655,7 +655,7 @@ data = slice(data, 1:(n() -662))
 ```{r}
 dim(prevision)
 ```
-1655 *0.8(=1324) observations de 21 variables,
+On a donc 1655 observations de 21 variables,
 cela est suffisant pour la régression multiple.
 
 <br> </br>
@@ -752,8 +752,14 @@ Notre jeu de donnée pour la regression linéaire est prêt.
 ## Régression multiple avec toutes les variables explicatives
 <br> </br>
 
-Nous allons effectuer plusieurs régressions, nous allons utiliser un jeu d'entrainement et un jeu de test pour comparer les différentes régressions.
-Puisque leurs nombre de variables explicatives seront différentes nous utiliserons le coefficient R² ajusté.
+Nous allons effectuer plusieurs régressions pour essayer d'expliquer la température en fonction des autres variables explicatives. 
+
+Nous allons utiliser le R² pour comparer les différentes régressions.
+Cette mesure indique la proportion de la variance expliquée par le modèle.
+
+* 0 % le modèle n'explique par la variable Y
+* 100 % le modèle explique la variabilité de Y lié à la liaison linéaire des variables explicatives entièrement
+
 
 ![](images/Rcarre.png)
 
@@ -830,26 +836,47 @@ Toutes les régressions testés affichent des résidus non gaussiens.
 Ceci n'est pas surprenant dans la mesure où nous avons 5000 observations.
 
 <br> </br>
-Regression avec toutes les variables.
+Regression avec toutes les variables en testant la normalité des résidus.
 ```{r}
 reg.mul <- lm(Temperature_Jour_Suivant ~.,prevision)
 shapiro.test(reg.mul$residuals)
 
 ```
-La p-value est inferieur à 5% donc on rejette H0, les Ei ne suivent pas des lois normales (résidus non gaussiens)
+<br> </br>
+
+On test Ho : "tt les Ɛi suivent N(0,1)"
+Ici la p-value est inferieur à 5% donc on rejette H0, d'après le test les Ɛi ne suivent pas des lois normales (résidus non gaussiens).
+
+<br> </br>
+
+Visualisons les résidus par un histogramme
+```{r}
+hist(reg.mul$residuals)
+#hist(reg.mul.prevision$residuals)
+```
+<br> </br>
+
+On réalise l'histogramme des résidus, ils ont la forme d'une Gaussienne.
+
+Donc les résidus semblent suivre une loi gaussienne.
 
 Le test shapiro affiche des résidus non gaussiens, mais ceci peut être expliqué par notre grand nombre d'observations.
 Cette hypothèse se confirmera lorsque nous regarderons l'histogramme des résidus.
 
 Ainsi nos tests de Fisher et student seront valables.
+
 <br> </br>
+
+
 Quels options sont possibles lorsque notre régression est mauvaise ?
 
 Premièrement, on vérifie par un test de Fisher que le modèle est valide.
+
 Deuxièmement,on peut ajouter la constante au modèle de regression ou d'autres variables explicatives afin de réduire les résidus.
+
 D'autres options sont possibles : une selection de variables (forward ou backward selection), imposer des contraintes au vecteur de régression (cf Lasso ou Ridge), réaliser une régression sur les composantes principales (ACP : variables non correlés)
 
-Continuons avec la régression du jeu de prévision.
+Continuons avec la régression multiple sur notre jeu de données.
 
 <br> </br>
 Résultat de la regression
@@ -859,7 +886,12 @@ summary(reg.mul)
 ```
 
 
-Les résidus estimés ont une moyenne de 0. 
+La moyenne des résidus n'est pas affiché car elle est de 0 (ils sont gaussiens). 
+
+La colonne Estimate correspond à notre vecteur des Bêta chapeau (notre estimateur de Bêta).
+
+Pour tester leur significativité on regarde les test de student, les t value sont les statistiques de student, si la p-value < 0.05 on rejette H0.
+Avec H0 : "Bi = 0" > Pour tout i appartenant à (1..21)
 
 Il nous est indiqué que 5 variables sont significatives, il y en a peu car les variables doivent être très corréllés.
 
@@ -867,40 +899,45 @@ Attention, Nous ne pouvons écrire que Temperature du jour suivant = 40 + TempÃ
 il faut refaire le modèle avec uniquement ces variables. 
 
 
-Un R² de 0.67 est trouvé.
-D'où 67% de la variance est expliqué par la régression.
+Un R² de 0.67 est trouvé et le R²ajusté = 0.67 également. 
+On test la validité du R² avec un test de fisher (f calculté = 104.6), 
+  la p_value est < 0.05 on rejette H0.
+
+Pour rappel : 
+  - R² = SCE / SCT
+  - R²ajusté = 1 - ( SCR / (n-p-1) ) / ( SCE / (n-p) )
+
+D'où 57% de la variance est expliqué par le modèle de regréssion.
 
 Pour comparer nos régressions,nous utiliserons le R² ajusté.
 
-<br> </br>
-Visualisons les résidus par un histogramme
-```{r}
-hist(reg.mul$residuals)
-#hist(reg.mul.prevision$residuals)
-```
-Les résidus semblent suivre une loi gaussienne.
+
+
 
 <br> </br>
-Réalisons les intervalles de confiance.
+Réalisons les intervalles de confiance à 95%.
 ```{r}
 confint(reg.mul)
 #confint(reg.mul.prevision)
 ```
-Ainsi sur 100 échantillon de mesures météorologiques, 95 seront dans ces valeurs.
+Ainsi sur un échantillon de mesures météorologiques de 100 individus, 95 seront dans ces valeurs.
 
 
 <br> </br>
 
-Test d'une Regression sans la Constante
+Test d'une Regression sans la Constante :
 ```{r}
 reg.mulSansC <- lm(Temperature_Jour_Suivant~.-1,prevision)
 shapiro.test(reg.mulSansC$residuals)
 summary(reg.mulSansC)
 ```
-R² de 1.
+Le test de shapiro donne des résidus non gaussiens (sans surprise).
+
+On trouve un R² d'environ 1, ce qui est normal.
+
 
 <br> </br>
-On refait une régression avec les variables significatives de reg.mul 
+On refait une régression avec les variables significatives de reg.mul et la constante
 ```{r}
 
 
@@ -914,6 +951,9 @@ reg.mulfin <- lm(Temperature_Jour_Suivant~Variation.de.pression.en.24.heures +
 summary(reg.mulfin)
 ```
 <br> </br>
+
+On trouve un R² de 0.60 et le R² ajusté également.
+
 Touts les paramètres sont significatifs.
 
 ```{r}
@@ -924,6 +964,7 @@ shapiro.test(reg.mulfin$residuals)
 <br> </br>
 ### Matrice des corrélations des variables explicative
 <br> </br>
+
 Corrélation entre toutes les variables
 ```{r,results='hide'}
 #correlation
@@ -935,11 +976,7 @@ mcor
 
 
 ```
-On remarque que des groupes entre variables de memes unités se forme tel vitesse du vent avec les données sur les rafales.
 
-Les corrélations les plus importantes sont celles avec Temperature du jour suivant qui est fortement correlés à 3 autres variables.
-
-A noter que nos variables ont des fortes corrélations, nous verrons cet impact avec la régression sur ACP.
 
 <br> </br>
 Visualisation graphique des correlations.
@@ -957,7 +994,21 @@ corrplot(mcor,type="upper",
 ```
 
 <br> </br>
-Représentation des résidus, on ne doit pas dépasser 5%.
+La matricé était symétrique, on ne garde que le triangle supérieur. 
+
+Bleu foncé > corrélation positive forte.
+Rouge foncé > corrélation négative forte.
+
+On remarque que des groupes entre variables de memes unités se forme tel vitesse du vent avec les données sur les rafales.
+
+Les corrélations les plus importantes sont celles avec Temperature du jour suivant qui est fortement correlés à 3 autres variables.
+
+A noter que nos variables ont des fortes corrélations, nous verrons cet impact avec la régression sur ACP.
+
+<br> </br>
+
+On représentation des résidus, on ne doit pas dépasser 5%.
+
 ```{r}
 res.m <- rstudent(reg.mulfin)
 plot(res.m, pch=20,cex=1, ylab = "Residus", main="",ylim=c(-4,+4))
@@ -1025,24 +1076,25 @@ add1(reg1, scope =~Pression.au.niveau.mer +
        
        , test="F" )
 ```
-On remarque avec les différentes Pvalues que de nombreuses variables sont éligibles à la rentrée dans le modèle.
+On remarque avec les différentes p-values que de nombreuses variables sont éligibles à la rentrée dans le modèle.
 
 La F value nous indique si l'augmentation du R² est significative.
 Par exemple, pour la variable "Pression.au.niveau.mer", l'hypothèse H0 est "Bêta^Pression.au.niveau.mer = 0"
+On rejette cette hypothèse si la p-value est inférieur à 0.05, Donc Bêta^Pression.au.niveau.mer est significatif.
 
 Si cela est significatif on peut introduire la variable dans le modèle.
 
-
 On remarque que plusieurs variables affiche une pvalue de 2.2e-16 , càd le nbre le plus bas affichable par R.
 
-Je départage ces variables en prenant en compte le critère AIC.
-Je prends le critère AIC le plus bas, ce n'est pas préciser mais il semble qu'il s'agisse du coefficient corrigé (lorsque n/k > 40)
+On départage ces variables en prenant en compte la F value.
+
+On prend la f-value la plus grande,, ce n'est pas préciser mais il semble qu'il s'agisse du coefficient corrigé (lorsque n/k > 40)
 cela permet de maximiser la qualité de l'ajustement en pénalisant l'over-fitting.
 
 résumé over fitting : très peu voir aucune erreurs sur notre jeu d'entrainement mais beaucoup d'erreurs avec un jeu de test.
 
 <br> </br>
-TempÃ.rature.minimale.du.sol.sur.12.heures  a l'AIC le plus faible, sa pvalue permet de rejetter H0
+TempÃ.rature.minimale.du.sol.sur.12.heures  a la F value la plus forte, sa pvalue permet de rejeter H0
 On créé un nouveau modèle avec cette variable ajouter.
 ```{r, include=FALSE}
 #introduction de la variable dans le modèle pour une régression à 2 variables
@@ -1431,7 +1483,7 @@ add1(update(reg1,~.+Température.minimale.du.sol.sur.12.heures+
        
        , test="F"  )
 ```
-Aucune variable à introduire, on arrete notre forward selection ici.
+Aucune variable à introduire, on arrête notre forward selection ici.
 <br> </br>
 Modele de la forward regression
 ```{r}
@@ -1452,14 +1504,26 @@ reg.mul.forward <- lm(Temperature_Jour_Suivant~Température.minimale.du.sol.sur.
 summary(reg.mul.forward)
 ```
 <br> </br>
+
+Avec cette méthode on peut écrire l'équation du modèle.
+Y : la température et Bêta chapeau le vecteur issues de la colonne Estimate de dimension 9 (avec la constante).
+
+On a un R² de 0.67 et un R² également. 
+
 On test les résidus
+
+<br> </br>
 ```{r}
 shapiro.test(reg.mul.forward$residuals)
 ```
+<br> </br> 
 
+Les résidus ne sont toujours pas Gaussiens par le test de Shapiro.
 
 <br> </br>
-Test d'une procédure automatique.
+
+Méthode forwards (procédure automatique).
+
 ```{r}
 full <- lm(Temperature_Jour_Suivant ~.,prevision)
 null <-   lm(Temperature_Jour_Suivant ~1,prevision)
@@ -1469,193 +1533,113 @@ formula(forw)
 shapiro.test(lm(forw,prevision)$residuals)
 ```
 Aucun changement entre la procédure automatique et manuel.
+
 <br> </br>
 ### Descendant
-Essayons la backward selection.
+Méthode Backward selection (procédure manuelle).
 <br> </br>
-On commence par voir quel paramètre on retirera en premier. On utilise le test de Fisher pour cela.
+On commence par voir quel paramètre on retirera en premier. 
+
+On utilise le test de Fisher pour cela pour déterminer celui qui est la moins significative > celle qui fait diminuer le R².
+
+On rappel que pour le test de fisher, la statistique calculée est :
+    - ( SCE / n ) / ( SCR / (n-p-1))
+    
+On regarde la variable qui a la plus petite F Value, et on la supprime du modèle. 
+
 ```{r}
 lm.full <- lm(Temperature_Jour_Suivant ~.,prevision)
 drop1(lm.full,test="F")
 ```
-à chaque itération, on retire la p-value de F la plus forte
+à chaque itération, on retire la p-value de F la plus faible
 ```{r,results='hide' ,eval=FALSE, include=FALSE}
-drop1(update(lm.full,~.-HumiditÃ. 
+drop1(update(lm.full,~.-Vitesse.du.vent.moyen.10.mn
              ), test="F")
 ```
 
 ```{r,results='hide',eval=FALSE, include=FALSE}
-drop1(update(lm.full,~.-HumiditÃ. 
-             -PrÃ.cipitations.dans.les.3.derniÃ.res.heures
+drop1(update(lm.full,~.-Vitesse.du.vent.moyen.10.mn-Température
              ), test="F")
 ```
 
 ```{r,results='hide',eval=FALSE, include=FALSE}
-drop1(update(lm.full,~.-HumiditÃ. 
-             -PrÃ.cipitations.dans.les.3.derniÃ.res.heures
-             -PrÃ.cipitations.dans.les.12.derniÃ.res.heures 
+drop1(update(lm.full,~.-Vitesse.du.vent.moyen.10.mn-Température-Hauteur.de.base.2 
              ), test="F")
 ```
 
 ```{r,results='hide',eval=FALSE, include=FALSE}
-drop1(update(lm.full,~.-HumiditÃ. 
-             -PrÃ.cipitations.dans.les.3.derniÃ.res.heures
-             -PrÃ.cipitations.dans.les.12.derniÃ.res.heures 
-             -PrÃ.cipitations.dans.les.6.derniÃ.res.heures  
+drop1(update(lm.full,~.-Vitesse.du.vent.moyen.10.mn-Température-Hauteur.de.base.2-Variation.de.pression.en.3.heures
              ), test="F")
 ```
 
 ```{r,results='hide',eval=FALSE, include=FALSE}
-drop1(update(lm.full,~.-HumiditÃ. 
-             -PrÃ.cipitations.dans.les.3.derniÃ.res.heures
-             -PrÃ.cipitations.dans.les.12.derniÃ.res.heures 
-             -PrÃ.cipitations.dans.les.6.derniÃ.res.heures  
-             -Rafale.sur.les.10.derniÃ.res.minutes 
+drop1(update(lm.full,~.-Vitesse.du.vent.moyen.10.mn-Température-Hauteur.de.base.2-Variation.de.pression.en.3.heures-Précipitations.dans.les.24.dernières.heures
              ), test="F")
 ```
 
 ```{r,results='hide',eval=FALSE, include=FALSE}
-drop1(update(lm.full,~.-HumiditÃ. 
-             -PrÃ.cipitations.dans.les.3.derniÃ.res.heures
-             -PrÃ.cipitations.dans.les.12.derniÃ.res.heures 
-             -PrÃ.cipitations.dans.les.6.derniÃ.res.heures  
-             -Rafale.sur.les.10.derniÃ.res.minutes 
-             -PrÃ.cipitations.dans.les.24.derniÃ.res.heures
+drop1(update(lm.full,~.-Vitesse.du.vent.moyen.10.mn-Température-Hauteur.de.base.2-Variation.de.pression.en.3.heures-Précipitations.dans.les.24.dernières.heures-Direction.du.vent.moyen.10.mn 
              ), test="F")
 ```
 
 ```{r,results='hide',eval=FALSE, include=FALSE}
-drop1(update(lm.full,~.-HumiditÃ. 
-             -PrÃ.cipitations.dans.les.3.derniÃ.res.heures
-             -PrÃ.cipitations.dans.les.12.derniÃ.res.heures 
-             -PrÃ.cipitations.dans.les.6.derniÃ.res.heures  
-             -Rafale.sur.les.10.derniÃ.res.minutes 
-             -PrÃ.cipitations.dans.les.24.derniÃ.res.heures
-             -Hauteur.de.la.base.des.nuages.de.l.Ã.tage.infÃ.rieur
+drop1(update(lm.full,~.-Vitesse.du.vent.moyen.10.mn-Température-Hauteur.de.base.2-Variation.de.pression.en.3.heures-Précipitations.dans.les.24.dernières.heures-Direction.du.vent.moyen.10.mn-Précipitations.dans.les.3.dernières.heures
              ), test="F")
 ```
 
 ```{r,results='hide',eval=FALSE, include=FALSE}
 
-drop1(update(lm.full,~.-HumiditÃ. 
-             -PrÃ.cipitations.dans.les.3.derniÃ.res.heures
-             -PrÃ.cipitations.dans.les.12.derniÃ.res.heures 
-             -PrÃ.cipitations.dans.les.6.derniÃ.res.heures  
-             -Rafale.sur.les.10.derniÃ.res.minutes 
-             -PrÃ.cipitations.dans.les.24.derniÃ.res.heures
-             -Hauteur.de.la.base.des.nuages.de.l.Ã.tage.infÃ.rieur
-             -PrÃ.cipitations.dans.la.derniÃ.re.heure 
+drop1(update(lm.full,~.-Vitesse.du.vent.moyen.10.mn-Température-Hauteur.de.base.2-Variation.de.pression.en.3.heures-Précipitations.dans.les.24.dernières.heures-Direction.du.vent.moyen.10.mn-Précipitations.dans.les.3.dernières.heures-Rafale.sur.les.10.dernières.minutes
              ), test="F")
 
 ```
 
 ```{r,results='hide',eval=FALSE, include=FALSE}
-drop1(update(lm.full,~.-HumiditÃ. 
-             -PrÃ.cipitations.dans.les.3.derniÃ.res.heures
-             -PrÃ.cipitations.dans.les.12.derniÃ.res.heures 
-             -PrÃ.cipitations.dans.les.6.derniÃ.res.heures  
-             -Rafale.sur.les.10.derniÃ.res.minutes 
-             -PrÃ.cipitations.dans.les.24.derniÃ.res.heures
-             -Hauteur.de.la.base.des.nuages.de.l.Ã.tage.infÃ.rieur
-             -PrÃ.cipitations.dans.la.derniÃ.re.heure 
-             -Vitesse.du.vent.moyen.10.mn                 
+drop1(update(lm.full,~.-Vitesse.du.vent.moyen.10.mn-Température-Hauteur.de.base.2-Variation.de.pression.en.3.heures-Précipitations.dans.les.24.dernières.heures-Direction.du.vent.moyen.10.mn-Précipitations.dans.les.3.dernières.heures-Rafale.sur.les.10.dernières.minutes-Visibilité.horizontale           
              ), test="F")
 ```
 
 ```{r,results='hide',eval=FALSE, include=FALSE}
-drop1(update(lm.full,~.-HumiditÃ. 
-             -PrÃ.cipitations.dans.les.3.derniÃ.res.heures
-             -PrÃ.cipitations.dans.les.12.derniÃ.res.heures 
-             -PrÃ.cipitations.dans.les.6.derniÃ.res.heures  
-             -Rafale.sur.les.10.derniÃ.res.minutes 
-             -PrÃ.cipitations.dans.les.24.derniÃ.res.heures
-             -Hauteur.de.la.base.des.nuages.de.l.Ã.tage.infÃ.rieur
-             -PrÃ.cipitations.dans.la.derniÃ.re.heure 
-             -Vitesse.du.vent.moyen.10.mn 
-             -NebulositÃ..totale 
+drop1(update(lm.full,~.-Vitesse.du.vent.moyen.10.mn-Température-Hauteur.de.base.2-Variation.de.pression.en.3.heures-Précipitations.dans.les.24.dernières.heures-Direction.du.vent.moyen.10.mn-Précipitations.dans.les.3.dernières.heures-Rafale.sur.les.10.dernières.minutes-Visibilité.horizontale-Pression.station     
              ), test="F")
 ```
 
 ```{r,results='hide',eval=FALSE, include=FALSE}
-drop1(update(lm.full,~.-HumiditÃ. 
-             -PrÃ.cipitations.dans.les.3.derniÃ.res.heures
-             -PrÃ.cipitations.dans.les.12.derniÃ.res.heures 
-             -PrÃ.cipitations.dans.les.6.derniÃ.res.heures  
-             -Rafale.sur.les.10.derniÃ.res.minutes 
-             -PrÃ.cipitations.dans.les.24.derniÃ.res.heures
-             -Hauteur.de.la.base.des.nuages.de.l.Ã.tage.infÃ.rieur
-             -PrÃ.cipitations.dans.la.derniÃ.re.heure 
-             -Vitesse.du.vent.moyen.10.mn 
-             -NebulositÃ..totale 
-             -Pression.au.niveau.mer  
+drop1(update(lm.full,~.-Vitesse.du.vent.moyen.10.mn-Température-Hauteur.de.base.2-Variation.de.pression.en.3.heures-Précipitations.dans.les.24.dernières.heures-Direction.du.vent.moyen.10.mn-Précipitations.dans.les.3.dernières.heures-Rafale.sur.les.10.dernières.minutes-Visibilité.horizontale-Pression.station-Précipitations.dans.les.6.dernières.heures 
              ), test="F")
 ```
 
 ```{r,results='hide',eval=FALSE, include=FALSE}
-drop1(update(lm.full,~.-HumiditÃ. 
-             -PrÃ.cipitations.dans.les.3.derniÃ.res.heures
-             -PrÃ.cipitations.dans.les.12.derniÃ.res.heures 
-             -PrÃ.cipitations.dans.les.6.derniÃ.res.heures  
-             -Rafale.sur.les.10.derniÃ.res.minutes 
-             -PrÃ.cipitations.dans.les.24.derniÃ.res.heures
-             -Hauteur.de.la.base.des.nuages.de.l.Ã.tage.infÃ.rieur
-             -PrÃ.cipitations.dans.la.derniÃ.re.heure 
-             -Vitesse.du.vent.moyen.10.mn 
-             -NebulositÃ..totale 
-             -Pression.au.niveau.mer  
-             -Direction.du.vent.moyen.10.mn   
+drop1(update(lm.full,~.-Vitesse.du.vent.moyen.10.mn-Température-Hauteur.de.base.2-Variation.de.pression.en.3.heures-Précipitations.dans.les.24.dernières.heures-Direction.du.vent.moyen.10.mn-Précipitations.dans.les.3.dernières.heures-Rafale.sur.les.10.dernières.minutes-Visibilité.horizontale-Pression.station-Précipitations.dans.les.6.dernières.heures-Précipitations.dans.les.12.dernières.heures   
              ), test="F")
 ```
 
-```{r,results='hide',eval=FALSE, include=FALSE}
-drop1(update(lm.full,~.-HumiditÃ. 
-             -PrÃ.cipitations.dans.les.3.derniÃ.res.heures
-             -PrÃ.cipitations.dans.les.12.derniÃ.res.heures 
-             -PrÃ.cipitations.dans.les.6.derniÃ.res.heures  
-             -Rafale.sur.les.10.derniÃ.res.minutes 
-             -PrÃ.cipitations.dans.les.24.derniÃ.res.heures
-             -Hauteur.de.la.base.des.nuages.de.l.Ã.tage.infÃ.rieur
-             -PrÃ.cipitations.dans.la.derniÃ.re.heure 
-             -Vitesse.du.vent.moyen.10.mn 
-             -NebulositÃ..totale 
-             -Pression.au.niveau.mer  
-             -Direction.du.vent.moyen.10.mn  
-             -VisibilitÃ..horizontale   
-             
-             ), test="F")
-```
+
 <br> </br>
-Toutes les variables sont significatives, voici le modele backward selection complet.
+Toutes les variables sont significatives, on a le modele backward selection complet.
 ```{r}
 
-summary(update(lm.full,~.-Humidité
-             -Précipitations.dans.les.3.dernières.heures
-             -Précipitations.dans.les.6.dernières.heures
-             -Précipitations.dans.les.12.dernières.heures
-             -Rafale.sur.les.10.dernières.minutes
-             -Précipitations.dans.les.24.dernières.heures
-             -Hauteur.de.la.base.des.nuages.de.l.étage.inférieur
-             -Précipitations.dans.la.dernière.heure
-             -Vitesse.du.vent.moyen.10.mn
-             -Nebulosité.totale
-             -Pression.au.niveau.mer
-             -Direction.du.vent.moyen.10.mn
-             -Visibilité.horizontale   ))
+summary(update(lm.full,~.-Vitesse.du.vent.moyen.10.mn
+               -Température-Hauteur.de.base.2
+               -Variation.de.pression.en.3.heures
+               -Précipitations.dans.les.24.dernières.heures
+               -Direction.du.vent.moyen.10.mn
+               -Précipitations.dans.les.3.dernières.heures
+               -Rafale.sur.les.10.dernières.minutes
+               -Visibilité.horizontale-Pression.station-Précipitations.dans.les.6.dernières.heures
+               -Précipitations.dans.les.12.dernières.heures   ))
 
 
-shapiro.test(update(lm.full,~.-Humidité
-             -Précipitations.dans.les.3.dernières.heures
-             -Précipitations.dans.les.6.dernières.heures
-             -Précipitations.dans.les.12.dernières.heures
-             -Rafale.sur.les.10.dernières.minutes
-             -Précipitations.dans.les.24.dernières.heures
-             -Hauteur.de.la.base.des.nuages.de.l.étage.inférieur
-             -Précipitations.dans.la.dernière.heure
-             -Vitesse.du.vent.moyen.10.mn
-             -Nebulosité.totale
-             -Pression.au.niveau.mer
-             -Direction.du.vent.moyen.10.mn
-             -Visibilité.horizontale   )$residuals)
+shapiro.test(update(lm.full,~.
+                    -Vitesse.du.vent.moyen.10.mn
+                    -Température-Hauteur.de.base.2
+                    -Variation.de.pression.en.3.heures
+                    -Précipitations.dans.les.24.dernières.heures
+                    -Direction.du.vent.moyen.10.mn
+                    -Précipitations.dans.les.3.dernières.heures
+                    -Rafale.sur.les.10.dernières.minutes-Visibilité.horizontale
+                    -Pression.station-Précipitations.dans.les.6.dernières.heures
+                    -Précipitations.dans.les.12.dernières.heures   )$residuals)
 
 # summary(update(lm.full,~.-HumiditÃ.
 #              -PrÃ.cipitations.dans.les.3.derniÃ.res.heures
@@ -1686,7 +1670,13 @@ shapiro.test(update(lm.full,~.-Humidité
 #              -Direction.du.vent.moyen.10.mn
 #              -VisibilitÃ..horizontale   )$residuals)
 ```
-<br> </br>
+<br>
+
+Avec cette méthode on a un R² de 0.67, c'est également le cas du R² ajusté.
+
+On peut écrire le modèle avec le Béta chapeau : la colonne estimate.
+
+</br>
 Test par réalisation automatique de la backward selection.
 ```{r,results='hide'}
 back <- step(full, direction="backward")
@@ -1707,6 +1697,10 @@ Les résultats sont différents entre la procédure manuel et automatique.
 Continuons à rechercher une régression valide.
 <br> </br>
 On réalise une ACP normée avec 21 composantes principales.
+
+Les valeurs sont centrées et réduites : scale.unit = True,
+Nombre de composantes principales 21 : ncp.
+
 ```{r,fig.show='hide'}
 library(FactoMineR)
 res.pca = PCA(prevision[,1:21],scale.unit=TRUE, ncp=21,graph=T)
@@ -1721,7 +1715,16 @@ On sort les valeurs propre de la matrice de corrélation
 ```{r}
 res.pca$eig
 ```
-on remarque que avec les pts projeté sur la composante 1, on récupère 23% de la variance total.
+On remarque que avec les pts projeté sur la composante 1, on récupère 23% de la variance total (lamba / ncp) avec eigenvalue la valeur de lambda.
+
+On détermine la matrice des scores, toutes les dims sont orthogonaux.
+<br> </br>
+```{r, results='hide'}
+res.pca$ind$coord
+novariables<-res.pca$ind$coord
+
+
+```
 
 <br> </br>
 ```{r}
@@ -1732,13 +1735,33 @@ previsionACP$Temperature_Jour_Suivant <- prevision$Temperature_Jour_Suivant
 ```
 
 <br> </br>
-Forward regression sur ACP
+Méthode de régression sur ACP :
+
+Méthode Forward : 
+
+Sur toutes les données, et sur la constante.
+
 ```{r}
 lm.full <- lm(Temperature_Jour_Suivant ~.,previsionACP)
-lm.null <- lm(Temperature_Jour_Suivant ~1,previsionACP)
-```
+lm.full
 
-```{r,results='hide', include=FALSE}
+lm.null <- lm(Temperature_Jour_Suivant ~1,previsionACP)
+lm.null
+```
+<br> </br>
+
+Le principe est de tester pour chaque dim trouvé, si elle est significative par un test de fisher. 
+
+On ajoute à notre modèle celui qui est la plus significative.
+
+Dans la première itération : 
+  -> Dim 2 à une F value de 827.3598 pour une probabilité d'être supérieur à F < 2.2e-16. (donc très significative)
+  -> On l'ajoute au modèle
+  -> on passe à l'itération suivante, jusqu'à ne plus avoir de variables significatives.
+
+<br> </br>
+
+```{r, include=FALSE}
 add1(lm.null,
      scope=~
        Dim.1+
@@ -2088,7 +2111,9 @@ add1(update(lm.null,~.+Dim.1 +  Dim.2 +    Dim.3 +   Dim.4 +    Dim.5 +  Dim.6 +
 ```
 <br> </br><br> </br>
 
-J'ai refait cette regression en prenant soit le plus petit RSS ou soit les dimensions dans l'ordre, le résultat est le meme.
+En refaisant cette regression en prenant soit le plus petit RSS ou soit les dimensions dans l'ordre, le résultat est le meme.
+
+On a donc :
 
 
 ```{r}
@@ -2098,10 +2123,16 @@ reg.ACP <- lm(Temperature_Jour_Suivant~Dim.1 +  Dim.2 +    Dim.3 +   Dim.4 +    
 summary(reg.ACP)
 ```
 <br> </br>
+
+On a donc un modèle avec l'équation Y (température) et le Bêta chapeau qui est le vecteur estimate. 
+
+On obtient un R² de 0.67 et un R² de même valeur.
+
+<br> </br> 
 ```{r}
 shapiro.test(reg.ACP$residuals)
 ```
-C'est le meilleur résultat obtenu.
+
 
 <br> </br>
 ## Régression Ridge
@@ -2146,82 +2177,116 @@ summary(mod.ridgeopt)
 
 ```
 <br> </br>
-Utulisation d'une autre librairie pour réaliser une prédiction de la régression Ridge.
+
+
+<br> </br>
+Utilisation d'une autre librairie pour réaliser une prédiction de la régression Ridge.
+
+Cette librairie ne fonctionne pas avec des data frame, on convertit nos données
 ```{r}
+var <- prevision[,names(prevision) != 'Temperature_Jour_Suivant']
+var <- as.matrix(var)
+```
+
+
+<br> </br>
+On utilise la validation croisé pour éviter le sur-apprentissage.
+```{r,results='hide'}
 library(glmnet)
 
 
-ridge_opti = glmnet(x = prevision[,names(prevision) != 'Temperature_Jour_Suivant'], 
+ridge_opti = cv.glmnet(x = var, 
                        y = prevision$Temperature_Jour_Suivant, 
                        family = 'gaussian',
-                       lambda =69.36 )
+                       nfolds = 10
+                       )
+
+ridge_lambda <- ridge_opti$lambda.min 
+
+ridge_lambda
 
 summary(ridge_opti)
 
 ```
 
+<br> </br>
+On réalise une prédiction sur nos variables à partir du modèle
 ```{r}
-cols = c('pce', 'pop', 'psavert', 'uempmed')
-
-
-pre_proc_val <- preProcess(train[,cols], method = c("center", "scale"))
-
-
-train[,cols] = predict(pre_proc_val, train[,cols])
-
-test[,cols] = predict(pre_proc_val, test[,cols])
-
-
-summary(train)
+pred <- predict(ridge_opti, s = ridge_lambda, newx = var)
 ```
 
+<br> </br>
+On calcule SCE, SCT et Rcarre_ajuste avec les formules du cours
 ```{r}
+SCR <- sum((pred - prevision$Temperature_Jour_Suivant)^2)
+
+SCT <- sum((prevision$Temperature_Jour_Suivant - mean(prevision$Temperature_Jour_Suivant))^2)
+
+#on calcule le R² classique
+Rcarre <- 1 - (SCR / SCT)
+
+#                 (SCR)/n-p-1
+#R² ajusté = 1 -  ____________  
+#                 (SCT)/n-p
+# SCT = SCR + SCE => SCR = SCT - SCT
+RcarreAjust = 1 - ((SCR)/(nrow(prevision) -22 )/ (SCT/(nrow(prevision)-21)))
+
+SCR
+SCT
+Rcarre
+RcarreAjust
+
+
 
 ```
+Un R carré de 0.668 est obtenu
 
+<br> </br>
+## Lasso
+<br> </br>
 ```{r}
+lasso <- cv.glmnet(x = var, 
+                     y = prevision$Temperature_Jour_Suivant, 
+                       alpha = 1,
+                       standardize = TRUE,
+                       nfolds = 5)
+
+lasso_lambda <- lasso$lambda.min 
+
+lasso_lambda
+
 
 ```
-
 ```{r}
-
+predict_lasso <- predict(lasso, s = lasso_lambda, newx = var)
 ```
 
+<br> </br>
 ```{r}
+SCR <- sum((predict_lasso - prevision$Temperature_Jour_Suivant)^2)
 
+SCT <- sum((prevision$Temperature_Jour_Suivant - mean(prevision$Temperature_Jour_Suivant))^2)
+
+#on calcule le R² classique
+Rcarre <- 1 - (SCR / SCT)
+
+#                 (SCR)/n-p-1
+#R² ajusté = 1 -  ____________  
+#                 (SCT)/n-p
+# SCT = SCR + SCE => SCR = SCT - SCT
+RcarreAjust = 1 - ((SCR)/(nrow(prevision) -22 )/ (SCT/(nrow(prevision)-21)))
+
+SCR
+SCT
+Rcarre
+RcarreAjust
 ```
-
-```{r}
-
-```
-
-```{r}
-
-```
-
-```{r}
-
-```
-
-```{r}
-
-```
-
-```{r}
-
-```
-
-```{r}
-
-```
-
-```{r}
-
-```
-
+Un R² de 0.668 a été trouvé
 
 
 <br> </br>
+
+
 ## Comparaison
 
 <br> </br>
@@ -2270,20 +2335,64 @@ Les différents R² ajusté obtenus, sont :
 
 * 0.67 : Régression sur ACP
 
+* 0.67 : Régression Ridge
+
+* 0.67 : Régression Lasso
+
 La régression sans la constante obtiens un R² ajusté de 1, ce qui est logique puisque la droite de régression passe par l'origine.
 
 La régression avec toutes les variables obtient un R² de 0.67, lorsque nous essayons d'obtenir une régression "presque aussi bien" en retirons les variables les moins explicatives, le R² chute à 0.60.
 
-Ensuite, en utilisant les méthodes de protection de la régression, nous obtenons le même R² avec les régressions forward,backward,sur ACP,Ridge que avec la régression avec toutes les variables ! Nous voyons l'efficacité de ces méthodes.
+Ensuite, en utilisant les méthodes de protection de la régression, nous obtenons le même R² avec les régressions forward,backward,sur ACP, Ridge que avec la régression avec toutes les variables ! Nous voyons l'efficacité de ces méthodes.
 
 
+En partant d'une base open-source non construit pour cet effet, nous avons réussis à prédire (à notre échelle) la température du jour suivant en l'exprimant linéairment par rapport à un ensemble de variables explicatives.
 
-## Conclusion
-<br> </br>
-Prévision d'une température
-```{r}
-#voir fin reg multi avec toutes les variables.
-```
+## Bonus
+
+Le test est fait à J+1 : nous essayons de prédire la température du lendemain, mais en changeant notre décalage , nous pouvons prédire à J+n.
+
+Voici les résultats du R² à 
+
+**J+2**
+
+* 0.99 : Régression sans la constante
+
+* 0.57 : Régression avec toutes les variables 
+
+* 0.53 : Régression avec variables significatives
+
+* 0.57 : Régression forward
+
+* 0.57 : Régression backward
+
+* 0.57 : Régression sur ACP
+
+* 0.57 : Régression Ridge
+
+* 0.57 : Régression Lasso
+
+**J+10**
+
+* 0.99 : Régression sans la constante
+
+* 0.44 : Régression avec toutes les variables 
+
+* 0.40 : Régression avec variables significatives
+
+* 0.44 : Régression forward
+
+* 0.44 : Régression backward
+
+* 0.40 : Régression sur ACP
+
+* 0.44 : Régression Ridge
+
+* 0.44 : Régression Lasso
+
+Les prédictions sont plus difficiles avec le décalage des jours.
+
+
 
 
 
