@@ -1,0 +1,677 @@
+---
+title: |
+  ![](images/Meteo.png){width=25%}  
+output: word_document
+
+#   html_notebook :
+#     theme: cerulean
+#     number_sections: no
+#     toc: yes
+#     toc_float: true
+# editor_options:
+#   markdown:
+#     wrap: 72
+---
+<style type="text/css">
+
+body{ /* Normal  */
+      font-size: 20px;
+  }
+td {  /* Table  */
+  font-size: 8px;
+}
+h1.title {
+  font-size: 55px;
+  color: DarkBlue;
+}
+h1 { /* Header 1 */
+  font-size: 38px;
+  color: DarkBlue;
+}
+h2 { /* Header 2 */
+    font-size: 28px;
+  color: DarkBlue;
+}
+h3 { /* Header 3 */
+  font-size: 35px;
+  font-family: "Times New Roman", Times, serif;
+  color: DarkBlue;
+}
+code.r{ /* Code block */
+    font-size: 12px;
+}
+pre { /* Code block - determines code spacing between lines */
+    font-size: 14px;
+}
+</style>
+
+```{r setup, include=FALSE}
+#Librairies utilisés
+
+library(tidyverse) #data manipulation
+library(mice) # missing values
+
+library(keras) #LSTM
+library(tensorflow) #LSTM
+
+windowsFonts("Rubik" = windowsFont("Rubik"))
+```
+
+# Import
+
+```{r}
+data <- 
+  read.csv("observation-meteorologique-historiques-tours-synop.csv",
+           encoding="UTF-8",
+           sep=";")
+```
+
+# Nettoyage des données
+
+La collonne Date fait office d'ID de l'observation, supprimmons les doublons éventuels.
+Puis on ordonne les données selon la date
+```{r}
+data <- data %>% 
+  distinct(Date, .keep_all = TRUE)
+
+data <- data[order(as.Date(data$Date)),]
+```
+
+On met la date dans le bon format
+```{r}
+data$Date <- strptime(data$Date, format = '%Y-%m-%dT%H:%M:%OS')
+```
+
+
+D'après l'hébergeur les paramètres atmosphériques sont mesurés (température, humidité, direction et force du vent, pression atmosphérique...) ou observés (description des nuages, visibilité...) depuis la surface terrestre.
+
+Après lecture de la colonne Date, les données sont collectés de 2010 jusqu'à maintenant, il en résulte 34854 observations.
+
+
+
+L'ensemble de ces observations est tirés d'une seule station d'observation.
+Nous supprimons alors les colonnes correspondant à des indications géographiques
+```{r}
+#numero de la station météo
+data$ID.OMM.station<- NULL
+
+#coords géographique
+data$Coordonnees <- NULL
+data$Latitude <- NULL
+data$Longitude <- NULL
+data$Altitude <- NULL
+
+#Nom de la ville et département
+data$Nom <- NULL
+data$communes..code. <- NULL
+data$communes..name. <- NULL
+data$EPCI..name.  <- NULL
+data$EPCI..code. <- NULL
+data$department..name. <- NULL
+data$department..code. <- NULL
+data$region..name. <- NULL
+data$region..code. <- NULL
+
+#Il s'agit d'une conversion de Kelvin en celsius
+data$Température...C.  <- NULL
+
+#Aucune Variance : c'est une constante
+data$Periode.de.mesure.de.la.rafale <-  NULL
+
+#le mois est déjà compris dans la date
+data$mois_de_l_annee <-  NULL
+
+```
+
+On ne garde que les variables comportant moins de 15% de manquants.
+```{r}
+data <-  data %>% 
+        select(
+          where(
+            ~sum(is.na(.x)) < 0.15* nrow(data)) )
+```
+
+Observons les 22 variables restantes
+```{r}
+str(data)
+```
+
+Suppression des variables qualitatives
+```{r}
+length(unique(data$Type.de.tendance.barométrique))
+
+
+
+data$Type.de.tendance.barométrique <- NULL
+data$Temps.présent <- NULL
+data$Temps.passé.1 <- NULL
+data$Type.de.tendance.barométrique.1 <- NULL
+data$Temps.passé.1.1 <- NULL
+data$Temps.présent.1 <- NULL
+```
+Ce choix est arbitraire, une étude par text mining aurait pu permettre de tirer de l'information de ces collonnes. 
+
+
+Pourcentage de valeurs manquantes par variables
+```{r}
+apply(data, 2, function(col)sum(is.na(col))/length(col))
+```
+
+Nos variables manquantes sont numériques, utilisons le "Predictive Mean Matching" (PMM) du package MICE pour les compléter.
+```{r}
+NAremplacee <- mice(data[,2:13], m=1, maxit = 200, method = 'pmm', seed = 1)
+
+data[,2:13] <-  complete(NAremplacee,1)
+```
+
+Winsorizing des outliers.
+On remplace les valeurs extrêmes par le 2èmes et 98èmes centiles
+```{r}
+#data[,2:13] <- Winsorize(data[,2:13], na.rm = TRUE)
+```
+
+
+```{r}
+data <- data %>% 
+  mutate(  
+    Température = Température - 273,  # Température en Celsius
+    
+    #Isolons les différentes parties de la date  
+    Annee =  format(Date, format = "%Y"),
+    Mois =  format(Date, format = "%m"),
+    Jour =  format(Date, format = "%d"),
+    Heure =  format(Date, format = "%H")
+  )
+```
+
+
+
+
+# Analyse
+
+## Analyse descriptive
+
+Observons le nombre d'observations par jour,
+puis on regroupe par mois.
+```{r}
+data %>%
+    group_by( Annee, Mois, Jour) %>%
+    mutate(NombreObservation = n()) %>%
+    arrange(NombreObservation) %>% 
+    group_by(Annee) %>% 
+    summarise(TotalAnnee = sum(NombreObservation))
+```
+Le nombre d'observation par jour n'est pas constant, il va de 5 à 8. 
+
+Pour tenter une explication, j'ai déjà grouper par mois puis par Année, on observe aucune différence notable entre ces groupements, il n'y a pas eu d'année ou de mois avec un nombre d'observations significativement bas.
+
+
+Observons les 30 températures les plus chaudes
+```{r}
+data %>% 
+  mutate(rang = dense_rank(desc(Température))) %>% 
+  filter( rang < 30) %>% 
+  mutate(Date = as.character(Date)) %>% #Date en format affichable 
+  arrange(rang)
+```
+Bien que les mesures commencent en 2010, toutes les valeurs extrèmes sont parmis 2019 et 2020, es ce un épisode unique ou la trace d'une tendance ?
+
+
+Observons les moyennes de Températures par Année
+```{r}
+data %>%
+  group_by(Annee) %>%
+  summarise(MoyenneTemperatureAnnee = mean(Température)) %>%
+  arrange(desc(MoyenneTemperatureAnnee)) 
+```
+On remarque que les années récentes sont plus chaudes (significativement ?) que les précédentes, 2011 malgré sa place de 3ème au classement des années les plus chaude, n'est qu'à la 29ème position dans les valeurs extrêmes.
+
+
+Affichons l'évolution de la température au fil des années.
+```{r}
+TemperatureAnnee <-ggplot(data) +
+        aes(
+          x = as.numeric(data$Date),
+          y = Température,
+          colour = Visibilité.horizontale
+        ) +
+        geom_point(shape = "circle", size = 0.65) +
+        scale_color_distiller(palette = "Set1", direction = 1) +
+        theme_minimal()
+TemperatureAnnee 
+
+
+```
+On remarque une forte saisonnalité.
+
+
+Pour analyser uniquement la tendance, nous allons devoir annuler les saisonnalités, nous utiliserons pour ce faire les moyennes mobiles.
+
+Moyenne mobile 2x2920
+```{r}
+library(forecast)
+MM_ordre_2x150 <- ma(data$Température, 2920)
+```
+
+
+Affichage de la moyenne mobile
+```{r}
+TemperatureAnnee + geom_line(aes(y = MM_ordre_2x150), size = 1.2, alpha = 0.6, color = "blue")
+```
+Test de Coax Stuart pour savoir si la tendance est significative.
+```{r}
+library(randtests)
+cox.stuart.test(na.omit(MM_ordre_2x150), 'left.sided')
+```
+
+
+L'hypothèse Nulle de la présence d'une tendance croissante est accepté.
+
+Nous devons donc utilisé des modèles prédictifs prenant en compte la tendance et la saisonnalité pour nos prédictions. Nous pouvons pour ce faire utilisé le modèle de Buys Ballot, de plus nous pouvons utilisé des modèles à plusieurs inputs tel SARIMA & LSTM pour tirer partie des collonnes autres que Date et Température.
+
+## Préparation des données pour les modèles
+
+```{r}
+#La date en numérique
+data$DateNumerique <-  as.numeric(data$Date)
+
+data <-  data %>% 
+  mutate(
+    moisCycle = ((as.numeric(Mois)) -1)* (1/12),
+    JourCycle = ((as.numeric(Jour)) -1 )* (1/31),
+    HeureCycle = ((as.numeric(Heure))-1)*(1/24)
+                   )
+
+
+```
+
+
+Nous entraînerons nos modèles sur 80% des premières observations et réaliserons les prédictions sur les 20% suivantes. Nous pourrons ainsi avoir une belle représentation graphique des prédictions comparés aux données réelles.
+```{r}
+#Nombre de lignes totales
+n = nrow(data) 
+
+#80% données
+data_Train <- data[1:(n *0.8),]
+#20% données
+data_Test <- data[((n*0.8)):n,]
+```
+On remarque que les données du jeu de Test, commence le premier aout 2019.
+
+Fonction Affichage donnée prédite
+```{r}
+Affichage_Prediction <- function(Donnees, Modele){
+  library(ggplot2)
+  library(ggthemes)
+  
+  p <- ggplot(data =Donnees, aes(x = DateNumerique, colour = Visibilité.horizontale) ) + 
+    scale_color_distiller(palette = "Set1", direction = 1) +
+  
+    geom_point(aes(y = Température),shape = "circle", size = 0.65) +
+       geom_point(aes(y = Modele), size = 1.2, color = "blue")+
+  #  geom_line(aes(y = Modele), size = 1.2, alpha = 0.6, color = "blue")+
+   
+    
+    labs(x="Années",
+         y= "Température")+
+    theme_fivethirtyeight()+
+    theme(axis.title = element_text(), text = element_text(family = "Rubik")) 
+  
+ #Prédiction sur l'année 2019
+  p2 <- ggplot(data =Donnees, aes(x = DateNumerique, y = Température) ) +
+    geom_point(aes(y = Température),shape = "circle", size = 0.1)+
+    geom_line(aes(y = Modele), size = 0.9, alpha = 0.9, color = "blue")+
+    theme_fivethirtyeight()+
+    xlim (1564660800, 1639958400) +
+    ylim (-10, 35)
+
+
+  #Ajout zoom sur 2019
+ return( p +
+    annotation_custom(ggplotGrob(p2), xmin = 1262368800, xmax = 1592724800, ymin = -35, ymax = 0) +
+    geom_rect(aes(xmin = 1262368800, xmax = 1592724800, ymin = -35, ymax =  0), color='black', linetype='dashed', alpha=0) )
+
+return(p)
+}
+
+```
+
+
+
+# Buys Ballot Modèle
+
+## Estimation de la tendance
+```{r}
+
+
+#création d'une droite de régression
+Tendance <- lm(Température~DateNumerique,data = data_Train)
+
+# Prédiction de la tendance sur le jeu d'entrainement
+tendance=predict(Tendance)
+
+#Prédiction de la tendance sur le jeu de Test
+tendance2=predict(Tendance, newdata=data_Test) 
+
+TendancePredite <- c(tendance, tendance2)
+```
+
+
+Affichage de la tendance
+```{r}
+Affichage_Prediction(data, TendancePredite)
+```
+Estimation saisonnalité annuelle
+```{r}
+data_Train$ResidusTendance <- residuals(Tendance)
+
+EstimationSaisoAnnuelle =lm(ResidusTendance~0+as.factor(moisCycle),data=data_Train)
+```
+
+Prédictions de la saisonnalité annuelle
+```{r}
+#Jeu d'entrainement
+SaisoAnnuelTrain <- predict(EstimationSaisoAnnuelle)
+
+#Jeu de test
+SaisoAnnuelTest <- predict(EstimationSaisoAnnuelle, newdata=data_Test)
+
+SaisonnaliteAnnuellePredite <- c(SaisoAnnuelTrain,SaisoAnnuelTest)
+```
+
+Affichage avec la saisonnalité annuelle ajoutée
+```{r}
+ Affichage_Prediction(data, TendancePredite+SaisonnaliteAnnuellePredite)
+```
+Estimation saisonnalité mensuelle
+```{r}
+data_Train$ResidusSaisoAnnuelle <- residuals(EstimationSaisoAnnuelle)
+
+EstimationSaisoMensuelle =lm(ResidusSaisoAnnuelle~0+as.factor(JourCycle),data=data_Train)
+```
+
+Prédiction avec la saisonnalité mensuelle rajoutée
+```{r}
+#Jeu d'entrainement
+SaisoMensuelleTrain <- predict(EstimationSaisoMensuelle)
+
+#Jeu de test
+SaisoMensuelleTest <- predict(EstimationSaisoMensuelle, newdata=data_Test)
+
+SaisonnaliteMensuellePredite <- c(SaisoMensuelleTrain,SaisoMensuelleTest)
+```
+
+Affichage
+```{r}
+Affichage_Prediction(data, TendancePredite+SaisonnaliteAnnuellePredite+SaisonnaliteMensuellePredite)
+```
+On re-itère cela avec la saisonnalité journalière
+```{r}
+data_Train$ResidusSaisoMensuelle <- residuals(EstimationSaisoMensuelle)
+EstimationSaisoJournaliere =lm(ResidusSaisoMensuelle~0+as.factor(HeureCycle),data=data_Train)
+SaisoJournaliereTrain <- predict(EstimationSaisoJournaliere)
+SaisoJournaliereTest <- predict(EstimationSaisoJournaliere, newdata=data_Test)
+SaisonnaliteJournalierePredite <- c(SaisoJournaliereTrain,SaisoJournaliereTest)
+```
+
+## Affichage Prédictions
+
+```{r}
+Affichage_Prediction(data, TendancePredite+SaisonnaliteAnnuellePredite+SaisonnaliteMensuellePredite+SaisonnaliteJournalierePredite)
+```
+
+
+
+# LSTM modèle
+
+Source & traduit depuis http://datasideoflife.com/?p=1171
+
+## Préparation des données
+
+Le modèle LSTM nécessite des données normalisés
+```{r}
+
+scale_factors <- c(mean(data_Train$Température), sd(data_Train$Température))
+scaled_train <- data_Train %>%
+    dplyr::select(Température) %>%
+    dplyr::mutate(Température = (Température - scale_factors[1]) / scale_factors[2])
+```
+
+On souhaite prédire les 6971 prochaine valeurs.
+
+L'algorithme LSTM crée des prédictions basées sur les valeurs décalées. Cela signifie qu'il doit se référer à autant de valeurs précédentes que de points que nous souhaitons prédire. Comme nous voulons faire une prévision sur 6971 obs, nous devons baser chaque prédiction sur 6971 points de données. 
+```{r}
+prediction <- 6971
+lag <- prediction
+```
+
+De plus, keras LSTM attend un format tensoriel spécifique de la forme d'un tableau 3D de la forme [samples, timesteps, features] pour les prédicteurs (X) et pour les valeurs cibles (Y) :
+
+* samples spécifie le nombre d'observations qui seront traitées par lots.
+* timesteps nous indique le nombre de "pas" de temps (lags). Ou en d'autres termes, combien d'unités de temps en arrière nous voulons que notre réseau voit.
+* features spécifie le nombre de prédicteurs (1 pour les séries univariées et n pour les séries multivariées).
+
+Dans le cas des prédicteurs, cela se traduit par un tableau de dimensions : (nrow(data) - lag - prediction + 1, 6971, 1), où lag = prediction = 6971.
+
+
+```{r}
+scaled_train <- as.matrix(scaled_train)
+ 
+# we lag the data 6970 times and arrange that into columns
+x_train_data <- t(sapply(
+    1:(length(scaled_train) - lag - prediction + 1),
+    function(x) scaled_train[x:(x + lag - 1), 1]
+  ))
+ 
+# now we transform it into 3D form
+x_train_arr <- array(
+    data = as.numeric(unlist(x_train_data)),
+    dim = c(
+        nrow(x_train_data),
+        lag,
+        1
+    )
+)
+```
+
+```{r}
+y_train_data <- t(sapply(
+    (1 + lag):(length(scaled_train) - prediction + 1),
+    function(x) scaled_train[x:(x + prediction - 1)]
+))
+
+y_train_arr <- array(
+    data = as.numeric(unlist(y_train_data)),
+    dim = c(
+        nrow(y_train_data),
+        prediction,
+        1
+    )
+)
+#length(y_train_data)
+```
+
+
+On prépare les données pour la prédiction,
+il s'agit de nos 6971 dernières observations.
+
+```{r}
+x_test <- data$y[(nrow(scaled_train) - prediction + 1):nrow(scaled_train)]
+
+x_test_scaled <- (x_test - scale_factors[1]) / scale_factors[2]
+
+x_pred_arr <- array(
+    data = x_test_scaled,
+    dim = c(
+        1,
+        lag,
+        1
+    )
+)
+
+```
+
+## Création du modèle 
+
+```{r}
+lstm_model <- keras_model_sequential()
+
+lstm_model %>%
+  layer_lstm(units = 3, #50 size of the layer
+       batch_input_shape = c(1, dim(x_train_arr)[2], dim(x_train_arr)[3]), # batch size, timesteps, features
+       return_sequences = TRUE,
+       stateful = TRUE) %>%
+  # fraction of the units to drop for the linear transformation of the inputs
+  layer_dropout(rate = 0.5) %>%
+  layer_lstm(units = 3, #50
+        return_sequences = TRUE,
+        stateful = TRUE) %>%
+  layer_dropout(rate = 0.5) %>%
+  time_distributed(keras::layer_dense(units = 1))
+
+lstm_model %>%
+    compile(loss = 'mae', optimizer = 'adam', metrics = 'accuracy')
+
+summary(lstm_model)
+
+
+```
+
+Entrainement du modèle avec Shuffle en False pour garder la logique des données chronologiques 
+```{r}
+lstm_model %>% fit(
+    x = x_train_arr,
+    y = y_train_arr,
+    batch_size = 1,
+    epochs = 20,
+    verbose = 0,
+    shuffle = FALSE
+)
+```
+
+## Prediction sur jeu d'entrainement
+
+```{r}
+lstm_forecast <- lstm_model %>%
+    predict(x_pred_arr, batch_size = 1) %>%
+    .[, , 1]
+
+# rescale en format basique
+lstm_forecast <- lstm_forecast * scale_factors[2] + scale_factors[1]
+lstm_forecast
+```
+
+X résultats prédictions par input donc  transforme pour une seule prédiction
+
+```{r}
+fitted <- predict(lstm_model, x_train_arr, batch_size = 1) %>%
+     .[, , 1]
+
+if (dim(fitted)[2] > 1) {
+
+    fit <- c(fitted[, 1], fitted[dim(fitted)[1], 2:dim(fitted)[2]])
+} else {
+    fit <- fitted[, 1]
+}
+
+# rescale final de nos données
+fitted <- fit * scale_factors[2] + scale_factors[1]
+fitted <- c(rep(NA, lag), fitted)
+length(fitted)
+
+```
+
+## Prédiction sur jeu de Test
+
+```{r}
+lstm_forecast <- ts(lstm_forecast,
+    start = c(2019, 1),
+    end = c(2019, 12),
+    frequency = 12
+)
+
+lstm_forecast_display <- window(lstm_forecast, start= c(2019,1), end = c(2019,8))
+
+input_ts <- ts(data$y,
+    start = c(2011, 1),
+    end = c(2018, 12),
+    frequency = 12)
+
+
+lstm_forecast_display
+data_ts_test
+
+plot(input_ts, xlim=c(2011,2020))
+#lines(data_ts_test)
+# lines(lstm_forecast_display, col=3)
+
+
+
+```
+
+## Affichage Prédictions
+
+
+
+# Indicateurs de Performance sur les modèles
+
+## Choix indicateurs
+
+
+Nous utiliesrons les indicateurs R² et MAPE 
+```{r}
+
+#L'erreur absolue moyenne en pourcentage
+MAPE <-  function(donnees_reelle,donnees_predites){
+  return (mean(abs((donnees_reelle - donnees_predites)/donnees_reelle))*100)
+}
+
+#R²
+Rcarre <- function(donnees_reelle,donnees_predites){
+  
+  # le carré de leur corrélation 
+  #cor(donnees_reelle,donnees_predites)^2
+  
+  
+  SCR <- sum((donnees_predites - donnees_reelle)^2)
+  
+  SCT <- sum((donnees_reelle - mean(donnees_reelle))^2)
+  
+  #on calcule le R² classique
+  Rcarre <- 1 - (SCR / SCT)
+  
+  return(Rcarre)
+  
+  #                 (SCR)/n-p-1
+  #R² ajusté = 1 -  ____________  
+  #                 (SCT)/n-p
+  # SCT = SCR + SCE => SCR = SCT - SCT
+  #RcarreAjust = 1 - ((SCR)/(nrow(prevision) -22 )/ (SCT/(nrow(prevision)-21)))
+}
+```
+
+## R² Ajusté
+
+Sur le modèle de Buys-Ballot
+```{r}
+EnsemblePreditBuysBallot <- TendancePredite+SaisonnaliteAnnuellePredite+SaisonnaliteMensuellePredite+SaisonnaliteJournalierePredite
+TrainPreditBuysBallot <- tendance + SaisoAnnuelTrain + SaisoMensuelleTrain + SaisoJournaliereTrain
+TestPreditBuysBallot <- tendance2 + SaisoAnnuelTest + SaisoMensuelleTest + SaisoJournaliereTest
+
+cat("Rcarré globale : ",Rcarre(data$Température, EnsemblePreditBuysBallot),"\n")
+cat("Rcarré Entrainement : ",Rcarre(data_Train$Température, TrainPreditBuysBallot),"\n")
+cat("Rcarré Test : ",Rcarre(data_Test$Température, TestPreditBuysBallot),"\n")
+```
+
+
+## MAPE
+
+sur le modèle de Buys-Ballot
+```{r}
+cat("MAPE globale : ",MAPE(data$Température, EnsemblePreditBuysBallot),"\n")
+cat("MAPE Entrainement : ",MAPE(data_Train$Température, TrainPreditBuysBallot),"\n")
+cat("MAPE Test : ",MAPE(data_Test$Température, TestPreditBuysBallot),"\n")
+```
+
+
+
