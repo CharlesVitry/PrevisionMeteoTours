@@ -405,6 +405,8 @@ Affichage
 ```{r}
 Affichage_Prediction(data, TendancePredite+SaisonnaliteAnnuellePredite+SaisonnaliteMensuellePredite)
 ```
+
+
 On re-itère cela avec la saisonnalité journalière
 ```{r}
 data_Train$ResidusSaisoMensuelle <- residuals(EstimationSaisoMensuelle)
@@ -419,8 +421,6 @@ SaisonnaliteJournalierePredite <- c(SaisoJournaliereTrain,SaisoJournaliereTest)
 ```{r}
 Affichage_Prediction(data, TendancePredite+SaisonnaliteAnnuellePredite+SaisonnaliteMensuellePredite+SaisonnaliteJournalierePredite)
 ```
-
-
 
 # LSTM modèle
 
