@@ -18,7 +18,7 @@ Nous avons cependant une limite à notre analyse. Puisque l'ensemble de ces obse
 
 Après lecture de la colonne Date, les données sont collectées de janvier 2010 jusqu'à décembre 2021, il en résulte plus de **30k observations** & **86 variables**.
 
-------------------------------------------------------------------------
+---
 
 ## I Prévisions Buys-Ballot et Lissage
 
@@ -26,27 +26,27 @@ Après lecture de la colonne Date, les données sont collectées de janvier 2010
 
 Les transformations utilisés pour le nettoyage sont les suivants :
 
--   Suppression des variables à plus de 15% de manquants
+- Suppression des variables à plus de 15% de manquants
 
--   Suppression des variables qualitatives
+- Suppression des variables qualitatives
 
--   PMM du package Mice sur les manquants restants
+- PMM du package Mice sur les manquants restants
 
--   Winsorisation des données
+- Winsorisation des données
 
--   Séparation chronologique du jeu de données
+- Séparation chronologique du jeu de données
 
 ### Auto corrélation de la série temporelle
 
 L'auto corrélation de notre série temporelle correspond à la corrélation entre une mesure du trafic $t$ et les mesures précédentes $t - k$ ou les mesures suivantes $t + k$.
 
-L'auto covariance d'une variable 
+L'auto covariance d'une variable
 $Xt$
-de moyenne 
+de moyenne
 $\mu$
-et d'écart type 
+et d'écart type
 $\sigma$
-à un décalage 
+à un décalage
 $k$
 est donné par la formule
 
@@ -64,22 +64,30 @@ Une moyenne mobile est un filtre linéaire. Il permet de transformer une série 
 
 Une moyenne mobile en t est définit comme une combinaison linéaire finie des valeurs de la série correspondantes à des dates entourant t, c'est donc un lissage de la série.
 
-Une moyenne mobile d'ordre m peut être écrite tel que 
+Une moyenne mobile d'ordre m peut être écrite tel que
+
 $\begin{equation} \hat{T}_{t} = \frac{1}{m} \sum_{j=-k}^k y_{t+j}, \end{equation}$
 
-Avec 
+Avec
 $m=2k+1$
 
 On souhaite conserver uniquement la tendance, on choisit une **moyenne mobile 2x2920** pour annuler la saisonnalité annuelle.
 
-2920 correspond au nombre d'observations dans une année, nous avons utilisé une combinaison de moyennes mobiles pour la symétrie et la pondération. En effet, voici une moyenne mobile 2x12 : 
+2920 correspond au nombre d'observations dans une année, nous avons utilisé une combinaison de moyennes mobiles pour la symétrie et la pondération. En effet, voici une moyenne mobile 2x12 :
+
 $\hat{T}_{t} = \frac{1}{32}y_{t-6} + \frac{1}{12}y_{t-5} + \frac{1}{12}y_{t-4} + \frac{1}{12}y_{t-3} + \frac{1}{12}y_{t-2} + \frac{1}{12}y_{t-1} +\frac{1}{12}y_{t} + \frac{1}{12}y_{t+1} +\frac{1}{12}y_{t+2} + \frac{1}{12}y_{t+3} + \frac{1}{12}y_{t+4} + \frac{1}{12}y_{t+5} + \frac{1}{32}y_{t+6}.$
 
 ### Buys-Ballot
 
 L’approche de BUYS-BALLOT consiste à introduire des variables indicatrices correspondant à chaque saison définit par le cycle d’observation tel que $Xt = Zt + St + \mu t$
 
-Nous avons estimer dans un premier temp la tendance $Zt$, puis dans un second temps la saisonnalité $St$, tandis que les $\mu t$ ne peuvent pas être estimer puisqu’il s’agit par définition d’accidents.
+Nous avons estimer dans un premier temp la tendance
+$Zt$
+, puis dans un second temps la saisonnalité
+$St$
+, tandis que les
+$\mu t$
+ne peuvent pas être estimer puisqu’il s’agit par définition d’accidents.
 
 **Tendance + Saisonnalité Annuelle + Saisonnalité Mensuelle**
 
@@ -91,15 +99,15 @@ Nous avons estimer dans un premier temp la tendance $Zt$, puis dans un second te
 
 ### Model Validation
 
-Soit SCE la somme des distances au carré entre chaque valeur prédite par le modèle ${\widehat y_i}$ et la moyenne des réponses 
+Soit SCE la somme des distances au carré entre chaque valeur prédite par le modèle ${\widehat y_i}$ et la moyenne des réponses
 $\overline{y}$
 
 $\text{SCE} = \sum_{i=1}^{N}(\hat{y_i} – \overline{y})^2$
 
-Nous obtenons alors la part de dispersion expliquée par le modèle. Puis, nous calculons la dispersion totale des données nommé SCT 
+Nous obtenons alors la part de dispersion expliquée par le modèle. Puis, nous calculons la dispersion totale des données nommé SCT
 $\text{SCT} = \sum_{i=1}^{N}(y_{i } – \overline{y})^2$
 
-*Avec* $y_i$ *une valeur prise par une variable expliquée*
+_Avec_ $y_i$ _une valeur prise par une variable expliquée_
 
 Nous obtenons alors le R² par la combinaisons des calculs précédents $R^2 = \frac{SCE}{SCT}$
 
@@ -108,11 +116,11 @@ Pour compléter cette mesure, nous utiliserons donc l'erreur absolue moyenne en 
 C'est donc un pourcentage et par conséquent un indicateur pratique de comparaison.
 
 | Indicateur | Jeu Train (2010-2019) | Jeu Test (2020-2021) | Jeu globale (2010-2021) |
-|------------------|------------------|------------------|-------------------|
+| ---------- | --------------------- | -------------------- | ----------------------- |
 | R²         | 0.72                  | 0.68                 | 0.65                    |
 | MAPE       | 101%                  | 84%                  | 101%                    |
 
-------------------------------------------------------------------------
+---
 
 ## II Prévision Régressions Multiples
 
@@ -120,7 +128,7 @@ C'est donc un pourcentage et par conséquent un indicateur pratique de comparais
 
 ### DATA Préparation
 
-***Bilan des problématiques rencontrés avec le jeu de données et leurs résolutions.***
+**_Bilan des problématiques rencontrés avec le jeu de données et leurs résolutions._**
 
 <dl>
   <dt>Le nombre de variables est très important, les données qualitatives ou manquantes empêchent d'effectuer une régression</dt>
@@ -147,14 +155,14 @@ C'est donc un pourcentage et par conséquent un indicateur pratique de comparais
 
 Après nettoyage, nous avons **1655 observations de 21 variables**, cela est suffisant pour la régression multiple.
 
-------------------------------------------------------------------------
+---
 
 ### Model Building
 
 Nous allons effectuer plusieurs régressions pour essayer d’expliquer la température en fonction des autres variables explicatives.
 
 | R² ajusté obtenu | Modèle                                   |
-|------------------|------------------------------------------|
+| ---------------- | ---------------------------------------- |
 | 0.67             | Régression avec toutes les variables     |
 | 0.60             | Régression avec variables significatives |
 | 0.67             | Régression forward                       |
@@ -163,9 +171,9 @@ Nous allons effectuer plusieurs régressions pour essayer d’expliquer la temp�
 | 0.67             | Régression Ridge                         |
 | 0.67             | Régression Lasso                         |
 
-------------------------------------------------------------------------
+---
 
-------------------------------------------------------------------------
+---
 
 ### Model Validation
 
@@ -173,14 +181,14 @@ Nous allons effectuer plusieurs régressions pour essayer d’expliquer la temp�
 
 Nous allons utiliser le **R² ajusté** pour comparer les différentes régressions. Cette mesure indique la proportion de la variance expliquée par le modèle.
 
--   0 % le modèle n’explique par la variable Y
--   100 % le modèle explique la variabilité de Y lié à la liaison linéaire des variables explicatives entièrement
+- 0 % le modèle n’explique par la variable Y
+- 100 % le modèle explique la variabilité de Y lié à la liaison linéaire des variables explicatives entièrement
 
 La régression avec toutes les variables obtient un R² de **0.67**, lorsque nous essayons d’obtenir une régression “presque aussi bien” en retirons les variables les moins explicatives, le **R² chute à 0.60**.
 
 Ensuite, en utilisant les méthodes de **protection de la régression**, nous obtenons le même R² avec les régressions forward,backward,sur ACP, Ridge que avec la régression avec toutes les variables. Nous voyons l’efficacité de ces méthodes.
 
-------------------------------------------------------------------------
+---
 
 ## Conclusion :snowflake:
 
@@ -188,4 +196,4 @@ Ensuite, en utilisant les méthodes de **protection de la régression**, nous ob
 
 **Nous avons besoin des données de plusieurs stations afin d'obtenir des résultats viables, les résultats de la partie II ne sont pas exploitables car les modèles ne prenaient pas en compte la tendance et la saisonnalité (analyse confirmé par l'Anova).**
 
-*Bonus :* [Un test du package Shiny](https://www.youtube.com/watch?v=pUIEis6BMr8)
+_Bonus :_ [Un test du package Shiny](https://www.youtube.com/watch?v=pUIEis6BMr8)
