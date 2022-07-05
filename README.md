@@ -62,7 +62,7 @@ Avec $m=2k+1$
 
 On souhaite conserver uniquement la tendance, on choisit une **moyenne mobile 2x2920** pour annuler la saisonnalité annuelle.
 
-2920 correspond au nombre d'observations dans une années, nous avons utilisé une combinaison de moyennes mobiles pour la symétrie et la pondération. En effet, voici une moyenne mobile 2x12 : $\hat{T}_{t} = \frac{1}{32}y_{t-6} + \frac{1}{12}y_{t-5} + \frac{1}{12}y_{t-4} + \frac{1}{12}y_{t-3} + \frac{1}{12}y_{t-2} + \frac{1}{12}y_{t-1} +\frac{1}{12}y_{t} + \frac{1}{12}y_{t+1} +\frac{1}{12}y_{t+2} + \frac{1}{12}y_{t+3} + \frac{1}{12}y_{t+4} + \frac{1}{12}y_{t+5} + \frac{1}{32}y_{t+6}.$
+2920 correspond au nombre d'observations dans une année, nous avons utilisé une combinaison de moyennes mobiles pour la symétrie et la pondération. En effet, voici une moyenne mobile 2x12 : $\hat{T}_{t} = \frac{1}{32}y_{t-6} + \frac{1}{12}y_{t-5} + \frac{1}{12}y_{t-4} + \frac{1}{12}y_{t-3} + \frac{1}{12}y_{t-2} + \frac{1}{12}y_{t-1} +\frac{1}{12}y_{t} + \frac{1}{12}y_{t+1} +\frac{1}{12}y_{t+2} + \frac{1}{12}y_{t+3} + \frac{1}{12}y_{t+4} + \frac{1}{12}y_{t+5} + \frac{1}{32}y_{t+6}.$
 
 ### Buys-Ballot
 
@@ -72,11 +72,11 @@ Nous avons estimer dans un premier temp la tendance $Zt$, puis dans un second te
 
 **Tendance + Saisonnalité Annuelle + Saisonnalité Mensuelle**
 
-![](images/Mensuelle.png)
+<img src="images/Mensuelle.png" width="575"/>
 
-**Tendance + Saisonnalité Annuelle + Saisonnalité Mensuelle + Saisonnalité journalière** 
+**Tendance + Saisonnalité Annuelle + Saisonnalité Mensuelle + Saisonnalité journalière**
 
-![](images/Journaliere.png)
+<img src="images/Journaliere.png" width="587"/>
 
 ### Model Validation
 
@@ -90,12 +90,12 @@ Nous obtenons alors la part de dispersion expliquée par le modèle. Puis, nous 
 
 Nous obtenons alors le R² par la combinaisons des calculs précédents $R^2 = \frac{SCE}{SCT}$
 
-Pour compléter cette mesure, nous utiliserons donc l'erreur absolue moyenne en pourcentage (MAPE en anglais) Il s'agit de la moyenne des écarts en valeur absolue par rapport aux valeurs observées.
+Pour compléter cette mesure, nous utiliserons donc l'erreur absolue moyenne en pourcentage (MAPE en anglais). Il s'agit de la moyenne des écarts en valeur absolue par rapport aux valeurs observées.
 
 C'est donc un pourcentage et par conséquent un indicateur pratique de comparaison.
 
 | Indicateur | Jeu Train (2010-2019) | Jeu Test (2020-2021) | Jeu globale (2010-2021) |
-|-----------------|------------------|------------------|--------------------|
+|----------------|-------------------|------------------|--------------------|
 | R²         | 0.72                  | 0.68                 | 0.65                    |
 | MAPE       | 101%                  | 84%                  | 101%                    |
 
@@ -105,7 +105,7 @@ C'est donc un pourcentage et par conséquent un indicateur pratique de comparais
 
 :fast_forward: [Rapport](https://charlesvitry.github.io/PrevisionMeteoTours/PrevisionToursMeteo.html) :rewind:
 
-### DATA Preparation
+### DATA Préparation
 
 ***Bilan des problématiques rencontrés avec le jeu de données et leurs résolutions.***
 
