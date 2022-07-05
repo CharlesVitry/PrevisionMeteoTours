@@ -40,7 +40,15 @@ Les transformations utilisés pour le nettoyage sont les suivants :
 
 L'auto corrélation de notre série temporelle correspond à la corrélation entre une mesure du trafic $t$ et les mesures précédentes $t - k$ ou les mesures suivantes $t + k$.
 
-L'auto covariance d'une variable $Xt$ de moyenne $\mu$ et d'écart type $\sigma$ à un décalage $k$ est donné par la formule
+L'auto covariance d'une variable 
+$Xt$
+de moyenne 
+$\mu$
+et d'écart type 
+$\sigma$
+à un décalage 
+$k$
+est donné par la formule
 
 $\gamma_k= E((X_t-\mu)(X_{t+k}-\mu))$
 
@@ -56,13 +64,16 @@ Une moyenne mobile est un filtre linéaire. Il permet de transformer une série 
 
 Une moyenne mobile en t est définit comme une combinaison linéaire finie des valeurs de la série correspondantes à des dates entourant t, c'est donc un lissage de la série.
 
-Une moyenne mobile d'ordre m peut être écrite tel que $\begin{equation} \hat{T}_{t} = \frac{1}{m} \sum_{j=-k}^k y_{t+j}, \end{equation}$
+Une moyenne mobile d'ordre m peut être écrite tel que 
+$\begin{equation} \hat{T}_{t} = \frac{1}{m} \sum_{j=-k}^k y_{t+j}, \end{equation}$
 
-Avec $m=2k+1$
+Avec 
+$m=2k+1$
 
 On souhaite conserver uniquement la tendance, on choisit une **moyenne mobile 2x2920** pour annuler la saisonnalité annuelle.
 
-2920 correspond au nombre d'observations dans une année, nous avons utilisé une combinaison de moyennes mobiles pour la symétrie et la pondération. En effet, voici une moyenne mobile 2x12 : $\hat{T}_{t} = \frac{1}{32}y_{t-6} + \frac{1}{12}y_{t-5} + \frac{1}{12}y_{t-4} + \frac{1}{12}y_{t-3} + \frac{1}{12}y_{t-2} + \frac{1}{12}y_{t-1} +\frac{1}{12}y_{t} + \frac{1}{12}y_{t+1} +\frac{1}{12}y_{t+2} + \frac{1}{12}y_{t+3} + \frac{1}{12}y_{t+4} + \frac{1}{12}y_{t+5} + \frac{1}{32}y_{t+6}.$
+2920 correspond au nombre d'observations dans une année, nous avons utilisé une combinaison de moyennes mobiles pour la symétrie et la pondération. En effet, voici une moyenne mobile 2x12 : 
+$\hat{T}_{t} = \frac{1}{32}y_{t-6} + \frac{1}{12}y_{t-5} + \frac{1}{12}y_{t-4} + \frac{1}{12}y_{t-3} + \frac{1}{12}y_{t-2} + \frac{1}{12}y_{t-1} +\frac{1}{12}y_{t} + \frac{1}{12}y_{t+1} +\frac{1}{12}y_{t+2} + \frac{1}{12}y_{t+3} + \frac{1}{12}y_{t+4} + \frac{1}{12}y_{t+5} + \frac{1}{32}y_{t+6}.$
 
 ### Buys-Ballot
 
@@ -80,11 +91,13 @@ Nous avons estimer dans un premier temp la tendance $Zt$, puis dans un second te
 
 ### Model Validation
 
-Soit SCE la somme des distances au carré entre chaque valeur prédite par le modèle ${\widehat y_i}$ et la moyenne des réponses $\overline{y}$
+Soit SCE la somme des distances au carré entre chaque valeur prédite par le modèle ${\widehat y_i}$ et la moyenne des réponses 
+$\overline{y}$
 
 $\text{SCE} = \sum_{i=1}^{N}(\hat{y_i} – \overline{y})^2$
 
-Nous obtenons alors la part de dispersion expliquée par le modèle. Puis, nous calculons la dispersion totale des données nommé SCT $\text{SCT} = \sum_{i=1}^{N}(y_{i } – \overline{y})^2$
+Nous obtenons alors la part de dispersion expliquée par le modèle. Puis, nous calculons la dispersion totale des données nommé SCT 
+$\text{SCT} = \sum_{i=1}^{N}(y_{i } – \overline{y})^2$
 
 *Avec* $y_i$ *une valeur prise par une variable expliquée*
 
@@ -95,7 +108,7 @@ Pour compléter cette mesure, nous utiliserons donc l'erreur absolue moyenne en 
 C'est donc un pourcentage et par conséquent un indicateur pratique de comparaison.
 
 | Indicateur | Jeu Train (2010-2019) | Jeu Test (2020-2021) | Jeu globale (2010-2021) |
-|----------------|-------------------|------------------|--------------------|
+|------------------|------------------|------------------|-------------------|
 | R²         | 0.72                  | 0.68                 | 0.65                    |
 | MAPE       | 101%                  | 84%                  | 101%                    |
 
