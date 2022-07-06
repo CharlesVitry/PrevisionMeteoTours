@@ -66,7 +66,7 @@ Une moyenne mobile en t est définit comme une combinaison linéaire finie des v
 
 Une moyenne mobile d'ordre m peut être écrite tel que
 
-$\begin{equation} \hat{T}_{t} = \frac{1}{m} \sum_{j=-k}^k y_{t+j}, \end{equation}$
+$$\begin{equation} \hat{T}_{t} = \frac{1}{m} \sum_{j=-k}^k y_{t+j}, \end{equation}$$
 
 Avec
 $m=2k+1$
@@ -75,7 +75,7 @@ On souhaite conserver uniquement la tendance, on choisit une **moyenne mobile 2x
 
 2920 correspond au nombre d'observations dans une année, nous avons utilisé une combinaison de moyennes mobiles pour la symétrie et la pondération. En effet, voici une moyenne mobile 2x12 :
 
-$\hat{T}_{t} = \frac{1}{32}y_{t-6} + \frac{1}{12}y_{t-5} + \frac{1}{12}y_{t-4} + \frac{1}{12}y_{t-3} + \frac{1}{12}y_{t-2} + \frac{1}{12}y_{t-1} +\frac{1}{12}y_{t} + \frac{1}{12}y_{t+1} +\frac{1}{12}y_{t+2} + \frac{1}{12}y_{t+3} + \frac{1}{12}y_{t+4} + \frac{1}{12}y_{t+5} + \frac{1}{32}y_{t+6}.$
+$$\hat{T}_{t} = \frac{1}{32}y_{t-6} + \frac{1}{12}y_{t-5} + \frac{1}{12}y_{t-4} + \frac{1}{12}y_{t-3} + \frac{1}{12}y_{t-2} + \frac{1}{12}y_{t-1} +\frac{1}{12}y_{t} + \frac{1}{12}y_{t+1} +\frac{1}{12}y_{t+2} + \frac{1}{12}y_{t+3} + \frac{1}{12}y_{t+4} + \frac{1}{12}y_{t+5} + \frac{1}{32}y_{t+6}.$$
 
 ### Buys-Ballot
 
