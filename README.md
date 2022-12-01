@@ -1,4 +1,4 @@
-# :sunny: Prévision Météo Tours :cloud:
+# :sunny: Prévision Météo Tours ! :cloud:
 
 1.  Prévision de la météo sur Tours par modèles de lissage moyenne mobile/exponentielle, Buys-Ballot et LSTM.
 
