@@ -1,12 +1,14 @@
 # :sunny: Prévision Météo Tours ! :cloud:
 
-1.  Prévision de la météo sur Tours par modèles de lissage moyenne mobile/exponentielle, Buys-Ballot et LSTM.
+# :fast_forward: [Présentation du modèle SARIMA](https://rpubs.com/OkaData/prevision_serie_chronologique_M2) :rewind:
+
+1.  Prévision de la météo sur Tours par modèles de lissage moyenne mobile/exponentielle, Buys-Ballot, Prophet et LSTM.
 
 2.  Régression multiple forward, backward, Ridge, Lasso et sur ACP
 
 ## Présentation données
 
-Le jeu de données choisis est **météorologique**, nous souhaitons prévoir la température du lendemain en fonction des autres variables quantitative.
+Le jeu de données choisis est **météorologique**, nous souhaitons prévoir la température du lendemain en fonction des autres variables quantitatives.
 
 Ce jeu de données a été obtenu dans les **opens data** de la ville de Tours, le fichier est trouvable [ici](https://data.tours-metropole.fr/explore/dataset/observation-meteorologique-historiques-tours-synop/export/?sort=date).
 
